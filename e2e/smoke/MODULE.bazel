@@ -1,5 +1,7 @@
-bazel_dep(name = "diff.bzl", version = "0.0.0", dev_dependency = True)
-bazel_dep(name = "bazel_skylib", version = "1.8.2", dev_dependency = True)
+"Test as an external module - intended for BCR presubmit"
+
+bazel_dep(name = "diff.bzl")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
 
 local_path_override(
     module_name = "diff.bzl",
