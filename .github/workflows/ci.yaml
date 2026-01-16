@@ -15,18 +15,12 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 jobs:
   test:
-    uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
-    with:
-      folders: |
-        [
-          ".",
-          "e2e/smoke"
-        ]
-      exclude: |
-        [
-          {"folder": ".", "bzlmodEnabled": false},
-          {"folder": ".", "bazelVersion": "6.4.0"}
-        ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: bazel-contrib/setup-bazel@0.18.0
+      - run: bazel test //...
+
   pre-commit:
     runs-on: ubuntu-latest
     steps:

@@ -1,12 +1,15 @@
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
-load("//mylang/private:resolved_toolchain.bzl", "resolved_toolchain")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//diff/private:resolved_toolchain.bzl", "resolved_toolchain")
 
-# This is the target rule authors should put in their "toolchains"
-# attribute in order to get a runtime for the correct platform.
-# See https://docs.bazel.build/versions/main/toolchains.html#writing-rules-that-use-toolchains
-toolchain_type(
-    name = "toolchain_type",
-    visibility = ["//visibility:public"],
+filegroup(name = "empty")
+
+build_test(
+    name = "smoke_test",
+    targets = [
+        # targets you add above
+        ":empty",
+    ],
 )
 
 resolved_toolchain(
@@ -22,11 +25,8 @@ bzl_library(
     srcs = ["repositories.bzl"],
     visibility = ["//visibility:public"],
     deps = [
-        "//mylang/private:toolchains_repo",
-        "//mylang/private:versions",
-        "@bazel_tools//tools/build_defs/repo:cache.bzl",
-        "@bazel_tools//tools/build_defs/repo:http.bzl",
-        "@bazel_tools//tools/build_defs/repo:utils.bzl",
+        "//diff/private:toolchains_repo",
+        "//diff/private:versions",
     ],
 )
 
