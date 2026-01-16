@@ -16,6 +16,17 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        bazel: ["8.x", "9.*"]
+        folder:
+          - .
+          - e2e/smoke
+    defaults:
+      run:
+        working-directory: ${{ matrix.folder }}
+    env:
+      USE_BAZEL_VERSION: ${{ matrix.bazel }}
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.18.0
