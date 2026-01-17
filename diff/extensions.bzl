@@ -12,18 +12,20 @@ effectively overriding the default named toolchain due to toolchain resolution p
 
 load(":repositories.bzl", "diff_register_toolchains")
 
-_DEFAULT_NAME = "diff"
+_DEFAULT_NAME = "diffutils"
 
-diff_toolchain = tag_class(attrs = {
+diffutils_toolchain = tag_class(attrs = {
     "name": attr.string(doc = """\
-Base name for generated repositories, allowing more than one diff toolchain to be registered.
+Base name for generated repositories, allowing more than one diffutils toolchain to be registered.
 Overriding the default is only permitted in the root module.
 """, default = _DEFAULT_NAME),
-    "diff_version": attr.string(doc = "Explicit version of diff.", mandatory = True),
+    "version": attr.string(doc = "Explicit version of diffutils."),
+    "use_system_diff": attr.bool(doc = "Whether to use the system diff tool from the PATH.", default = False),
 })
 
 def _toolchain_extension(module_ctx):
     registrations = {}
+    use_system_diff = False
     for mod in module_ctx.modules:
         for toolchain in mod.tags.toolchain:
             if toolchain.name != _DEFAULT_NAME and not mod.is_root:
@@ -31,9 +33,19 @@ def _toolchain_extension(module_ctx):
                 Only the root module may override the default name for the diff toolchain.
                 This prevents conflicting registrations in the global namespace of external repos.
                 """)
+            if toolchain.use_system_diff:
+                use_system_diff = True
+                continue
             if toolchain.name not in registrations.keys():
                 registrations[toolchain.name] = []
-            registrations[toolchain.name].append(toolchain.diff_version)
+            registrations[toolchain.name].append(toolchain.version)
+    if not len(registrations.keys()) and use_system_diff:
+        diff_register_toolchains(
+            name = _DEFAULT_NAME,
+            version = "system",
+            use_system_diff = True,
+            register = False,
+        )
     for name, versions in registrations.items():
         if len(versions) > 1:
             # TODO: should be semver-aware, using MVS
@@ -46,7 +58,7 @@ def _toolchain_extension(module_ctx):
 
         diff_register_toolchains(
             name = name,
-            diff_version = selected,
+            version = selected,
             register = False,
         )
     return module_ctx.extension_metadata(
@@ -62,7 +74,7 @@ def _toolchain_extension(module_ctx):
 
 diff = module_extension(
     implementation = _toolchain_extension,
-    tag_classes = {"toolchain": diff_toolchain},
+    tag_classes = {"toolchain": diffutils_toolchain},
     # Mark the extension as OS and architecture independent to simplify the
     # lock file. An independent module extension may still download OS- and
     # arch-dependent files, but it should download the same set of files
