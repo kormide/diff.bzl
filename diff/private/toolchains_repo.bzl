@@ -62,7 +62,7 @@ def _toolchains_repo_impl(repository_ctx):
 toolchain(
     name = "{platform}_toolchain",
     exec_compatible_with = {compatible_with},
-    toolchain = "@{user_repository_name}_{platform}//:diff_toolchain",
+    toolchain = "@{user_repository_name}_{platform}//:diffutils_toolchain",
     toolchain_type = "@diff.bzl//diff/toolchain:execution_type",
 )
 """.format(

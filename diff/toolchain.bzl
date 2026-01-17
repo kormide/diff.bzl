@@ -2,12 +2,13 @@
 """
 
 DiffutilsInfo = provider(
-    doc = "Information about how to invoke the tool executable.",
+    doc = "Information about how to invoke the tool executables.",
     fields = {
-        "target_tool_path": "Path to the tool executable for the target platform.",
-        "tool_files": """Files required in runfiles to make the tool executable available.
-
-May be empty if the target_tool_path points to a locally installed tool binary.""",
+        "diff_path": "Path to the diff executable",
+        "cmp_path": "Path to the cmp executable",
+        "diff3_path": "Path to the diff3 executable",
+        "sdiff_path": "Path to the sdiff executable",
+        "tool_files": """Files required in runfiles to make the tool executable available. May be empty for a locally installed tool binary.""",
     },
 )
 
@@ -18,7 +19,7 @@ def _to_manifest_path(ctx, file):
     else:
         return ctx.workspace_name + "/" + file.short_path
 
-def _diff_toolchain_impl(ctx):
+def _diffutils_toolchain_impl(ctx):
     if ctx.attr.target_tool and ctx.attr.target_tool_path:
         fail("Can only set one of target_tool or target_tool_path but both were set.")
     if not ctx.attr.target_tool and not ctx.attr.target_tool_path:
@@ -58,20 +59,32 @@ def _diff_toolchain_impl(ctx):
         template_variables,
     ]
 
-diff_toolchain = rule(
-    implementation = _diff_toolchain_impl,
+diffutils_toolchain = rule(
+    implementation = _diffutils_toolchain_impl,
     attrs = {
-        "target_tool": attr.label(
-            doc = "A hermetically downloaded executable target for the target platform.",
+        "diff_tool": attr.label(
+            doc = "A hermetically downloaded executable target for the diff tool.",
             mandatory = False,
             allow_single_file = True,
         ),
-        "target_tool_path": attr.string(
-            doc = "Path to an existing executable for the target platform.",
-            mandatory = False,
+        "cmp_tool": attr.label(
+            doc = "A hermetically downloaded executable target for the cmp tool.",
+            allow_single_file = True,
+        ),
+        "diff3_tool": attr.label(
+            doc = "A hermetically downloaded executable target for the diff3 tool.",
+            allow_single_file = True,
+        ),
+        "sdiff_tool": attr.label(
+            doc = "A hermetically downloaded executable target for the sdiff tool.",
+            allow_single_file = True,
+        ),
+        "use_system_diff": attr.bool(
+            doc = "Whether to use the system diff tool from the PATH.",
+            default = False,
         ),
     },
-    doc = """Defines a diff compiler/runtime toolchain.
+    doc = """Defines a diffutils toolchain.
 
 For usage see https://docs.bazel.build/versions/main/toolchains.html#defining-toolchains.
 """,
