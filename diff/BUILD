@@ -23,6 +23,10 @@ bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//diff/private:diff",
+        "@bazel_skylib//lib:partial",
+    ],
 )
 
 bzl_library(
