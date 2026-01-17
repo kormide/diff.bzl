@@ -1,0 +1,58 @@
+SYNOPSIS
+       diff3 [OPTION]... MYFILE OLDFILE YOURFILE
+
+DESCRIPTION
+       Compare three files line by line.
+
+       Mandatory arguments to long options are mandatory for short options too.
+
+       -A, --show-all
+              output all changes, bracketing conflicts
+
+       -e, --ed
+              output ed script incorporating changes from OLDFILE to YOURFILE into MYFILE
+
+       -E, --show-overlap
+              like -e, but bracket conflicts
+
+       -3, --easy-only
+              like -e, but incorporate only nonoverlapping changes
+
+       -x, --overlap-only
+              like -e, but incorporate only overlapping changes
+
+       -X     like -x, but bracket conflicts
+
+       -i     append 'w' and 'q' commands to ed scripts
+
+       -m, --merge
+              output actual merged file, according to -A if no other options are given
+
+       -a, --text
+              treat all files as text
+
+       --strip-trailing-cr
+              strip trailing carriage return on input
+
+       -T, --initial-tab
+              make tabs line up by prepending a tab
+
+       --diff-program=PROGRAM
+              use PROGRAM to compare files
+
+       -L, --label=LABEL
+              use LABEL instead of file name (can be repeated up to three times)
+
+       --help display this help and exit
+
+       -v, --version
+              output version information and exit
+
+       The default output format is a somewhat human-readable representation of the changes.
+
+       The -e, -E, -x, -X (and corresponding long) options cause an ed script to be output instead of the default.
+
+       Finally, the -m (--merge) option causes diff3 to do the merge internally and output the actual merged file.  For
+       unusual input, this is more robust than using ed.
+
+       If a FILE is '-', read standard input.  Exit status is 0 if successful, 1 if conflicts, 2 if trouble.
