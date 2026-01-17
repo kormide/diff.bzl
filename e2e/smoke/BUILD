@@ -9,7 +9,6 @@ load("@diff.bzl", "diff")
 
 diff(
     name = "case.1",
-    out = "case.1.diff",
     exit_code = "case.1.exit_code",
     # Shorthand to write a generated file with some content we can run through diff.
     # Typically your content would come from a source file, or the output of some other rule.
@@ -27,11 +26,12 @@ diff(
             "",
         ],
     ),
+    patch = "case.1.patch",
 )
 
 diff(
     name = "case.1.assert_diff",
-    file1 = "case.1.diff",
+    file1 = "case.1.patch",
     file2 = partial.make(
         write_file,
         content = [

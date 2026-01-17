@@ -4,13 +4,8 @@ load("//diff:defs.bzl", "diff")
 
 diff(
     name = "case.2",
-    file1 = partial.make(
-        write_file,
-        content = [
-            "file1",
-            "",
-        ],
-    ),
+    args = ["--unified"],
+    file1 = "some_file.txt",
     file2 = partial.make(
         write_file,
         content = [
