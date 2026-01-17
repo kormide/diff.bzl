@@ -32,35 +32,43 @@ def _validate_diff_binary(ctx):
     )
     return is_bsd_diff
 
+def _validate_exit_code(ctx, exit_code_file, code = 0):
+    exit_code_valid = ctx.actions.declare_file(exit_code_file.path + ".valid")
+    ctx.actions.run_shell(
+        inputs = [exit_code_file],
+        outputs = [exit_code_valid],
+        # assert that the input file first character is 0
+        command = """
+        if [ $(head -c 1 {}) != '{}' ]; then
+            >&2 echo "Files differ. Run some bazel command to repair it."
+            exit 1
+        fi
+        """.format(ctx.outputs.exit_code.path, code),
+    )
+    return exit_code_valid
+
 def _diff_rule_impl(ctx):
     # from 'man diff':
-    # > Exit status is 0 if inputs are the same, 1 if different, 2 if trouble.
-    # For now, we have two modes:
-    # 1. Exit code mode: we want to return the exit code of the diff command, so that it doesn't make the build fail when the diff is non-zero
-    # 2. Output mode: we want to return the output of the diff command, but let Bazel honor the exit code.
-    # This is temporary to get the smoke test running, will iterate on a more user-ergonomic API.
-    if int(bool(ctx.attr.exit_code)) + int(bool(ctx.attr.out)) != 1:
-        fail("Exactly one of 'exit_code' or 'out' must be set")
-    outputs = [o for o in [ctx.outputs.exit_code, ctx.outputs.out] if o]
+    command = "diff {} {} > {}; echo $? > {}".format(
+        ctx.file.file1.path,
+        ctx.file.file2.path,
+        ctx.outputs.out.path,
+        ctx.outputs.exit_code.path,
+    )
+    outputs = [ctx.outputs.out, ctx.outputs.exit_code]
+    ctx.actions.run_shell(
+        inputs = [ctx.file.file1, ctx.file.file2],
+        outputs = outputs,
+        command = command,
+    )
 
-    if ctx.outputs.exit_code:
-        ctx.actions.run_shell(
-            inputs = [ctx.file.file1, ctx.file.file2],
-            outputs = [ctx.outputs.exit_code],
-            command = "diff {} {}; echo $? > {}".format(ctx.file.file1.path, ctx.file.file2.path, ctx.outputs.exit_code.path),
-        )
-    else:
-        ctx.actions.run_shell(
-            inputs = [ctx.file.file1, ctx.file.file2],
-            outputs = [ctx.outputs.out],
-            command = "diff {} {} > {}".format(ctx.file.file1.path, ctx.file.file2.path, ctx.outputs.out.path),
-        )
+    validation_outputs = [_validate_diff_binary(ctx)]
+    if ctx.attr.validate:
+        validation_outputs.append(_validate_exit_code(ctx, ctx.outputs.exit_code))
 
     return [
         DefaultInfo(files = depset(outputs)),
-        OutputGroupInfo(
-            _validation = depset([_validate_diff_binary(ctx)]),
-        ),
+        OutputGroupInfo(_validation = depset(validation_outputs)),
     ]
 
 diff_rule = rule(
@@ -69,7 +77,26 @@ diff_rule = rule(
         "file1": attr.label(allow_single_file = True),
         "file2": attr.label(allow_single_file = True),
         "diff": attr.label(allow_single_file = True),
-        "exit_code": attr.output(),
-        "out": attr.output(),
+        "exit_code": attr.output(
+            doc = """\
+              The exit status of the diff command is written to this file.
+
+              From 'man diff':
+              > Exit status is 0 if inputs are the same, 1 if different, 2 if trouble.
+            """,
+            mandatory = True,
+        ),
+        "out": attr.output(
+            doc = """\
+              The standard output of the diff command is written to this file.
+            """,
+            mandatory = True,
+        ),
+        "validate": attr.bool(
+            doc = """\
+              If true, the diff command is validated to ensure it exits with 0.
+              Run bazel with --norun_validations to skip this behavior.
+            """,
+        ),
     },
 )
