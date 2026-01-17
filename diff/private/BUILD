@@ -1,6 +1,12 @@
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 
 bzl_library(
+    name = "diff",
+    srcs = ["diff.bzl"],
+    visibility = ["//diff:__subpackages__"],
+)
+
+bzl_library(
     name = "toolchains_repo",
     srcs = ["toolchains_repo.bzl"],
     visibility = ["//diff:__subpackages__"],

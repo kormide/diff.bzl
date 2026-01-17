@@ -1,16 +1,5 @@
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("//diff/private:resolved_toolchain.bzl", "resolved_toolchain")
-
-filegroup(name = "empty")
-
-build_test(
-    name = "smoke_test",
-    targets = [
-        # targets you add above
-        ":empty",
-    ],
-)
 
 resolved_toolchain(
     name = "resolved_toolchain",
@@ -34,6 +23,10 @@ bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//diff/private:diff",
+        "@bazel_skylib//lib:partial",
+    ],
 )
 
 bzl_library(
