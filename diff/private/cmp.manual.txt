@@ -1,0 +1,38 @@
+SYNOPSIS
+       cmp [OPTION]... FILE1 [FILE2 [SKIP1 [SKIP2]]]
+
+DESCRIPTION
+       Compare two files byte by byte.
+
+       The optional SKIP1 and SKIP2 specify the number of bytes to skip at the beginning of each file (zero by default).
+
+       Mandatory arguments to long options are mandatory for short options too.
+
+       -b, --print-bytes
+              print differing bytes
+
+       -i, --ignore-initial=SKIP
+              skip first SKIP bytes of both inputs
+
+       -i, --ignore-initial=SKIP1:SKIP2
+              skip first SKIP1 bytes of FILE1 and first SKIP2 bytes of FILE2
+
+       -l, --verbose
+              output byte numbers and differing byte values
+
+       -n, --bytes=LIMIT
+              compare at most LIMIT bytes
+
+       -s, --quiet, --silent
+              suppress all normal output
+
+       --help display this help and exit
+
+       -v, --version
+              output version information and exit
+
+       SKIP values may be followed by the following multiplicative suffixes: kB 1000, K 1024, MB 1,000,000, M 1,048,576, GB
+       1,000,000,000, G 1,073,741,824, and so on for T, P, E, Z, Y.
+
+       If a FILE is '-' or missing, read standard input.  Exit status is 0 if inputs are the same, 1 if different, 2 if
+       trouble.
