@@ -62,6 +62,9 @@ def _diff_rule_impl(ctx):
         ctx.outputs.patch.path,
         ctx.outputs.exit_code.path,
     )
+
+    # If both inputs are generated, there's no writable file to patch.
+    is_copy_to_source = ctx.file.file1.is_source or ctx.file.file2.is_source
     outputs = [ctx.outputs.patch, ctx.outputs.exit_code]
     ctx.actions.run_shell(
         inputs = [ctx.file.file1, ctx.file.file2],
@@ -70,6 +73,7 @@ def _diff_rule_impl(ctx):
     )
 
     validation_outputs = [_validate_diff_binary(ctx)]
+    copy_to_source_outputs = [ctx.outputs.patch] if is_copy_to_source else []
     if ctx.attr.validate or ctx.attr._options[DiffOptionsInfo].validate_diffs:
         validation_outputs.append(_validate_exit_code(ctx, ctx.outputs.exit_code, """\
         ERROR: diff command exited with non-zero status.
@@ -83,7 +87,7 @@ def _diff_rule_impl(ctx):
         OutputGroupInfo(
             _validation = depset(validation_outputs),
             # By reading the Build Events, a Bazel wrapper can identify this diff output group and apply the patch.
-            diff_bzl__patch = depset([ctx.outputs.patch]),
+            diff_bzl__patch = depset(copy_to_source_outputs),
         ),
     ]
 
