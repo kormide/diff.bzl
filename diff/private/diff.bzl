@@ -1,7 +1,9 @@
 """Implements the diff rule."""
 
+load("//diff/private:options.bzl", "DiffOptionsInfo")
+
 # When accessing tools in the PATH
-DIFF_BIN = "diff"
+DIFF_BIN = "/opt/homebrew/bin/diff"
 
 def _validate_diff_binary(ctx):
     """Validate that the diff binary is GNU diffutils.
@@ -68,7 +70,7 @@ def _diff_rule_impl(ctx):
     )
 
     validation_outputs = [_validate_diff_binary(ctx)]
-    if ctx.attr.validate:
+    if ctx.attr.validate or ctx.attr._options[DiffOptionsInfo].validate_diffs:
         validation_outputs.append(_validate_exit_code(ctx, ctx.outputs.exit_code, """\
         ERROR: diff command exited with non-zero status.
 
@@ -80,6 +82,7 @@ def _diff_rule_impl(ctx):
         DefaultInfo(files = depset(outputs)),
         OutputGroupInfo(
             _validation = depset(validation_outputs),
+            # By reading the Build Events, a Bazel wrapper can identify this diff output group and apply the patch.
             diff_bzl__patch = depset([ctx.outputs.patch]),
         ),
     ]
@@ -114,8 +117,11 @@ diff_rule = rule(
         "validate": attr.bool(
             doc = """\
               If true, the diff command is validated to ensure it exits with 0.
-              Run bazel with --norun_validations to skip this behavior.
+              To enable this behavior for the whole build, run Bazel with --@diff.bzl//diff:validate_diffs.
+
+              An individual Bazel invocation can run with --norun_validations to skip this behavior.
             """,
         ),
+        "_options": attr.label(default = "//diff:diff_options"),
     },
 )

@@ -1,5 +1,29 @@
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("//diff/private:options.bzl", "diff_options")
 load("//diff/private:resolved_toolchain.bzl", "resolved_toolchain")
+
+bool_flag(
+    name = "validate_diffs",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "validate_diffs.enabled",
+    flag_values = {
+        ":validate_diffs": "True",
+    },
+)
+
+diff_options(
+    name = "diff_options",
+    validate_diffs = select({
+        ":validate_diffs.enabled": True,
+        "//conditions:default": False,
+    }),
+    visibility = ["//diff:__subpackages__"],
+)
 
 resolved_toolchain(
     name = "resolved_toolchain",

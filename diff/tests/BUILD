@@ -13,6 +13,4 @@ diff(
             "",
         ],
     ),
-    # Change to True to get a build failure
-    validate = False,
 )
