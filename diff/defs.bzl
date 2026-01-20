@@ -10,7 +10,7 @@ def diff(name, file1, file2, patch = None, exit_code = None, **kwargs):
         name: The name of the rule.
         file1: The first file to diff.
         file2: The second file to diff.
-        patch: The output file to write the diff to. Defaults to <name>.diff.
+        patch: The output file to write the diff to. Defaults to <name>.patch.
         exit_code: The output file to write the exit code to. Defaults to <name>.exit_code.
         **kwargs: Additional arguments to pass to the diff_rule.
     """

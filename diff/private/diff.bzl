@@ -79,7 +79,7 @@ def _diff_rule_impl(ctx):
         ERROR: diff command exited with non-zero status.
 
         To accept the diff, run:
-        cd \\$(bazel info workspace); patch < {patch}
+        (cd \\$(bazel info workspace); patch < {patch})
         """.format(patch = ctx.outputs.patch.path)))
 
     return [

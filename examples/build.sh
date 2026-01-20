@@ -2,8 +2,6 @@
 #
 # Shows an end-to-end workflow for running a build that applies diffs to the source files.
 # If the build failed, then we retry after applying the diffs.
-# This is meant to mimic the behavior of the `aspect build` command that will soon be extended
-# by using the Aspect CLI.
 #
 # To make the build fail when a diff is present, run with `--fail-on-diff`.
 # Run with `--dry-run` to just print the patches and not apply them.
