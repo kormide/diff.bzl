@@ -3,7 +3,7 @@
 load("//diff/private:options.bzl", "DiffOptionsInfo")
 
 # When accessing tools in the PATH
-DIFF_BIN = "/opt/homebrew/bin/diff"
+DIFF_BIN = "diff"
 
 def _validate_diff_binary(ctx):
     """Validate that the diff binary is GNU diffutils.
