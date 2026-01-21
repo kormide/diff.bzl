@@ -44,11 +44,12 @@ def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with b
         outputs = [exit_code_valid],
         # assert that the input file first character is 0
         command = """
+        touch {}
         if [ $(head -c 1 {}) != '{}' ]; then
             >&2 echo "{}"
             exit 1
         fi
-        """.format(ctx.outputs.exit_code.path, code, error_message),
+        """.format(exit_code_valid.path, ctx.outputs.exit_code.path, code, error_message),
     )
     return exit_code_valid
 
@@ -79,7 +80,7 @@ def _diff_rule_impl(ctx):
         ERROR: diff command exited with non-zero status.
 
         To accept the diff, run:
-        (cd \\$(bazel info workspace); patch < {patch})
+        patch -d \\$(bazel info workspace) -p0 < {patch}
         """.format(patch = ctx.outputs.patch.path)))
 
     return [
