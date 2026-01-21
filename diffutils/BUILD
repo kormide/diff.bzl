@@ -1,7 +1,7 @@
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
-load("//diff/private:options.bzl", "diff_options")
-load("//diff/private:resolved_toolchain.bzl", "resolved_toolchain")
+load("//diffutils/private:options.bzl", "diff_options")
+load("//diffutils/private:resolved_toolchain.bzl", "resolved_toolchain")
 
 bool_flag(
     name = "validate_diffs",
@@ -22,7 +22,7 @@ diff_options(
         ":validate_diffs.enabled": True,
         "//conditions:default": False,
     }),
-    visibility = ["//diff:__subpackages__"],
+    visibility = ["//diffutils:__subpackages__"],
 )
 
 resolved_toolchain(
@@ -38,8 +38,8 @@ bzl_library(
     srcs = ["repositories.bzl"],
     visibility = ["//visibility:public"],
     deps = [
-        "//diff/private:toolchains_repo",
-        "//diff/private:versions",
+        "//diffutils/private:toolchains_repo",
+        "//diffutils/private:versions",
     ],
 )
 
@@ -48,7 +48,7 @@ bzl_library(
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
     deps = [
-        "//diff/private:diff",
+        "//diffutils/private:diff",
         "@bazel_skylib//lib:partial",
     ],
 )
@@ -67,4 +67,7 @@ bzl_library(
     name = "toolchain",
     srcs = ["toolchain.bzl"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//diffutils/private:toolchains_repo",
+    ],
 )

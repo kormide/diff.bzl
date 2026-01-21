@@ -10,11 +10,11 @@ TODO: delete after dropping support for Bazel 8 or earlier.
 
 # Forward all the providers
 def _resolved_toolchain_impl(ctx):
-    toolchain_info = ctx.toolchains["//diff/toolchain:execution_type"]
+    toolchain_info = ctx.toolchains["//diffuils/toolchain:toolchain_type"]
     return [
         toolchain_info,
         toolchain_info.default,
-        toolchain_info.diffinfo,
+        toolchain_info.diffutilsinfo,
         toolchain_info.template_variables,
     ]
 
@@ -22,6 +22,6 @@ def _resolved_toolchain_impl(ctx):
 # https://cs.opensource.google/bazel/bazel/+/master:tools/jdk/java_toolchain_alias.bzl
 resolved_toolchain = rule(
     implementation = _resolved_toolchain_impl,
-    toolchains = ["//diff/toolchain:execution_type"],
+    toolchains = ["//diffutils/toolchain:toolchain_type"],
     doc = DOC,
 )
