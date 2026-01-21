@@ -70,6 +70,8 @@ def _diff_rule_impl(ctx):
         inputs = [ctx.file.file1, ctx.file.file2],
         outputs = outputs,
         command = command,
+        mnemonic = "DiffutilsDiff",
+        progress_message = "Diffing %{input} to %{output}",
     )
 
     validation_outputs = [_validate_diff_binary(ctx)]
