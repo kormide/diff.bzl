@@ -8,8 +8,7 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
 
 bazel_dep(name = "buildifier_prebuilt", version = "8.2.1", dev_dependency = True)
-
-bazel_dep(name = "bazelrc-preset.bzl", version = "1.6.0")
+bazel_dep(name = "bazelrc-preset.bzl", version = "1.6.0", dev_dependency = True)
 
 diff = use_extension("//diff:extensions.bzl", "diff")
 diff.toolchain(diff_version = "1.14.2")
