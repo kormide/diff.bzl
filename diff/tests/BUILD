@@ -22,6 +22,7 @@ diff(
     args = [
         "--recursive",
         "--unified",
+        "--new-file",
     ],
     exit_code = "case.3.exit_code",
     file1 = "case.3.dir_a",
@@ -38,6 +39,7 @@ diff(
             "",
         ],
     ),
+    validate = True,
 )
 
 diff(
@@ -46,19 +48,21 @@ diff(
     file2 = partial.make(
         write_file,
         content = [
-            "diff -ruN diff/tests/case.3_dir_a/cow.txt diff/tests/case.3_dir_b/cow.txt",
-            "--- diff/tests/case.3_dir_a/cow.txt	2026-01-21 11:22:43.591706770 -0800",
-            "+++ diff/tests/case.3_dir_b/cow.txt	1969-12-31 16:00:00.000000000 -0800",
-            "@@ -1 +0,0 @@",
-            "-moo, moooooo!",
-            "diff -ruN diff/tests/case.3_dir_a/file.txt diff/tests/case.3_dir_b/file.txt",
-            "--- diff/tests/case.3_dir_a/file.txt	2026-01-21 11:22:20.542796020 -0800",
-            "+++ diff/tests/case.3_dir_b/file.txt	2026-01-21 11:22:25.596464693 -0800",
+            "diff --recursive --unified --new-file diff/tests/case.3.dir_a/cow.txt diff/tests/case.3.dir_b/cow.txt",
+            "--- diff/tests/case.3.dir_a/cow.txt	1969-12-31 16:00:00.000000000 -0800",
+            "+++ diff/tests/case.3.dir_b/cow.txt	2026-01-23 16:40:30.908899317 -0800",
+            "@@ -0,0 +1 @@",
+            "+moo, moooooo!",
+            "diff --recursive --unified --new-file diff/tests/case.3.dir_a/file.txt diff/tests/case.3.dir_b/file.txt",
+            "--- diff/tests/case.3.dir_a/file.txt	2026-01-23 16:40:30.908899317 -0800",
+            "+++ diff/tests/case.3.dir_b/file.txt	2026-01-23 16:40:30.909669226 -0800",
             "@@ -1 +1,2 @@",
-            "hello",
+            " hello",
             "+goodbye",
+            "",
         ],
     ),
+    validate = True,
 )
 
 diff(
