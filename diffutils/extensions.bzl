@@ -1,7 +1,7 @@
 """Extensions for bzlmod.
 
-Installs a diff toolchain.
-Every module can define a toolchain version under the default name, "diff".
+Installs a diffutils toolchain based on the diffutils rust crate: https://crates.io/crates/diffutils
+Every module can define a toolchain version under the default name, "diffutils".
 The latest of those versions will be selected (the rest discarded),
 and will always be registered by diff.bzl.
 
@@ -10,16 +10,17 @@ names (the latest version will be picked for each name) and can register them as
 effectively overriding the default named toolchain due to toolchain resolution precedence.
 """
 
-load(":repositories.bzl", "diff_register_toolchains")
+load("//diffutils/private:versions.bzl", "LATEST_VERSION")
+load(":repositories.bzl", "diffutils_register_toolchains")
 
-_DEFAULT_NAME = "diff"
+_DEFAULT_NAME = "diffutils"
 
-diff_toolchain = tag_class(attrs = {
+diffutils_toolchain = tag_class(attrs = {
     "name": attr.string(doc = """\
 Base name for generated repositories, allowing more than one diff toolchain to be registered.
 Overriding the default is only permitted in the root module.
 """, default = _DEFAULT_NAME),
-    "diff_version": attr.string(doc = "Explicit version of diff.", mandatory = True),
+    "diffutils_version": attr.string(doc = "Explicit version of diffutils.", default = LATEST_VERSION),
 })
 
 def _toolchain_extension(module_ctx):
@@ -28,25 +29,25 @@ def _toolchain_extension(module_ctx):
         for toolchain in mod.tags.toolchain:
             if toolchain.name != _DEFAULT_NAME and not mod.is_root:
                 fail("""\
-                Only the root module may override the default name for the diff toolchain.
+                Only the root module may override the default name for the diffutils toolchain.
                 This prevents conflicting registrations in the global namespace of external repos.
                 """)
             if toolchain.name not in registrations.keys():
                 registrations[toolchain.name] = []
-            registrations[toolchain.name].append(toolchain.diff_version)
+            registrations[toolchain.name].append(toolchain.diffutils_version)
     for name, versions in registrations.items():
         if len(versions) > 1:
             # TODO: should be semver-aware, using MVS
             selected = sorted(versions, reverse = True)[0]
 
             # buildifier: disable=print
-            print("NOTE: diff toolchain {} has multiple versions {}, selected {}".format(name, versions, selected))
+            print("NOTE: diffutils toolchain {} has multiple versions {}, selected {}".format(name, versions, selected))
         else:
             selected = versions[0]
 
-        diff_register_toolchains(
+        diffutils_register_toolchains(
             name = name,
-            diff_version = selected,
+            diffutils_version = selected,
             register = False,
         )
     return module_ctx.extension_metadata(
@@ -60,9 +61,9 @@ def _toolchain_extension(module_ctx):
         reproducible = True,
     )
 
-diff = module_extension(
+diffutils = module_extension(
     implementation = _toolchain_extension,
-    tag_classes = {"toolchain": diff_toolchain},
+    tag_classes = {"toolchain": diffutils_toolchain},
     # Mark the extension as OS and architecture independent to simplify the
     # lock file. An independent module extension may still download OS- and
     # arch-dependent files, but it should download the same set of files

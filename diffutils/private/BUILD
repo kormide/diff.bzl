@@ -6,23 +6,23 @@ bzl_library(
         "diff.bzl",
         "options.bzl",
     ],
-    visibility = ["//diff:__subpackages__"],
+    visibility = ["//diffutils:__subpackages__"],
 )
 
 bzl_library(
     name = "toolchains_repo",
     srcs = ["toolchains_repo.bzl"],
-    visibility = ["//diff:__subpackages__"],
+    visibility = ["//diffutils:__subpackages__"],
 )
 
 bzl_library(
     name = "versions",
     srcs = ["versions.bzl"],
-    visibility = ["//diff:__subpackages__"],
+    visibility = ["//diffutils:__subpackages__"],
 )
 
 bzl_library(
     name = "resolved_toolchain",
     srcs = ["resolved_toolchain.bzl"],
-    visibility = ["//diff:__subpackages__"],
+    visibility = ["//diffutils:__subpackages__"],
 )

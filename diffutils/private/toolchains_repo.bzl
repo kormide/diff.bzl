@@ -38,6 +38,12 @@ PLATFORMS = {
             "@platforms//cpu:x86_64",
         ],
     ),
+    "aarch64-unknown-linux-gnu": struct(
+        compatible_with = [
+            "@platforms//os:linux",
+            "@platforms//cpu:aarch64",
+        ],
+    ),
     "x86_64-pc-windows-msvc": struct(
         compatible_with = [
             "@platforms//os:windows",
@@ -62,8 +68,8 @@ def _toolchains_repo_impl(repository_ctx):
 toolchain(
     name = "{platform}_toolchain",
     exec_compatible_with = {compatible_with},
-    toolchain = "@{user_repository_name}_{platform}//:diff_toolchain",
-    toolchain_type = "@diff.bzl//diff/toolchain:execution_type",
+    toolchain = "@{user_repository_name}_{platform}//:diffutils_toolchain",
+    toolchain_type = "@diff.bzl//diffutils/toolchain:toolchain_type",
 )
 """.format(
             platform = platform,
