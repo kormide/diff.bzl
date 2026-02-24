@@ -2,8 +2,8 @@
 
 load("//diff/private:options.bzl", "DiffOptionsInfo")
 
-# When accessing tools in the PATH
-DIFF_BIN = "diff"
+# We run diff in actions, so we want to use the execution platform toolchain.
+DIFF_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
 def _validate_diff_binary(ctx):
     """Validate that the diff binary is GNU diffutils.
@@ -18,9 +18,9 @@ def _validate_diff_binary(ctx):
         The output file containing the validation result, which must be placed in a _validation output group.
     """
     is_bsd_diff = ctx.actions.declare_file(ctx.label.name + ".is_bsd_diff")
-
+    diffinfo = ctx.toolchains[DIFF_TOOLCHAIN_TYPE].diffinfo
     ctx.actions.run_shell(
-        inputs = [],  # TODO: should include the toolchain diff binary
+        inputs = diffinfo.tool_files,
         outputs = [is_bsd_diff],
         command = """\
         {diff_bin} --version > {validation_output}
@@ -31,7 +31,7 @@ def _validate_diff_binary(ctx):
           exit 1
         }} >&2
         """.format(
-            diff_bin = DIFF_BIN,
+            diff_bin = diffinfo.target_tool_path,
             validation_output = is_bsd_diff.path,
         ),
     )
@@ -54,9 +54,9 @@ def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with b
     return exit_code_valid
 
 def _diff_rule_impl(ctx):
-    # from 'man diff':
+    diffinfo = ctx.toolchains[DIFF_TOOLCHAIN_TYPE].diffinfo
     command = "{} {} {} {} > {}; echo $? > {}".format(
-        DIFF_BIN,
+        diffinfo.target_tool_path,
         " ".join(ctx.attr.args),
         ctx.file.file1.path,
         ctx.file.file2.path,
@@ -68,7 +68,7 @@ def _diff_rule_impl(ctx):
     is_copy_to_source = ctx.file.file1.is_source or ctx.file.file2.is_source
     outputs = [ctx.outputs.patch, ctx.outputs.exit_code]
     ctx.actions.run_shell(
-        inputs = [ctx.file.file1, ctx.file.file2],
+        inputs = [ctx.file.file1, ctx.file.file2] + diffinfo.tool_files,
         outputs = outputs,
         command = command,
         mnemonic = "DiffutilsDiff",
@@ -131,4 +131,5 @@ diff_rule = rule(
         ),
         "_options": attr.label(default = "//diff:diff_options"),
     },
+    toolchains = [DIFF_TOOLCHAIN_TYPE],
 )
