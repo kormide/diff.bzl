@@ -7,3 +7,5 @@ local_path_override(
     module_name = "diff.bzl",
     path = "../..",
 )
+
+register_toolchains("//tools/toolchains:all")
