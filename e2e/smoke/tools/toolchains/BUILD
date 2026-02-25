@@ -2,7 +2,7 @@ load("@diff.bzl//diff:toolchain.bzl", "diff_toolchain")
 
 diff_toolchain(
     name = "diffutils_toolchain",
-    target_tool_path = "/usr/bin/diff",
+    diff_path = "/usr/bin/diff",
 )
 
 toolchain(

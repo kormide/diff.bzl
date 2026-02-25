@@ -31,7 +31,7 @@ def _validate_diff_binary(ctx):
           exit 1
         }} >&2
         """.format(
-            diff_bin = diffinfo.target_tool_path,
+            diff_bin = diffinfo.diff_path,
             validation_output = is_bsd_diff.path,
         ),
     )
@@ -56,7 +56,7 @@ def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with b
 def _diff_rule_impl(ctx):
     diffinfo = ctx.toolchains[DIFF_TOOLCHAIN_TYPE].diffinfo
     command = "{} {} {} {} > {}; echo $? > {}".format(
-        diffinfo.target_tool_path,
+        diffinfo.diff_path,
         " ".join(ctx.attr.args),
         ctx.file.file1.path,
         ctx.file.file2.path,

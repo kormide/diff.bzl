@@ -2,7 +2,7 @@ load("@diff.bzl//diff:toolchain.bzl", "diff_toolchain")
 
 diff_toolchain(
     name = "diffutils_toolchain",
-    target_tool = "@diffutils//:diff",
+    diff_tool = "@diffutils//:diff",
 )
 
 toolchain(
