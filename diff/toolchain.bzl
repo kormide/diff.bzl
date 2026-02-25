@@ -6,7 +6,7 @@ DiffutilsInfo = provider(
     fields = {
         "diff_path": "(string) execroot-relative path to a GNU diff executable for the platform.",
         "tool_files": """\
-            (list of labels) Files required in runfiles to make the tool executable available.
+            (list of Files) runfiles required to make the tool executable available.
             May be empty if the diff_path points to a locally installed tool binary.""",
     },
 )
