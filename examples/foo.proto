@@ -6,4 +6,5 @@ message Foo {
     string name = 1;
     string description = 2;
     int32 age = 3;
+    repeated string tags = 4;
 }

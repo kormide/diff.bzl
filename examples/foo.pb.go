@@ -25,6 +25,7 @@ type Foo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Age           int32                  `protobuf:"varint,3,opt,name=age,proto3" json:"age,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,14 +74,22 @@ func (x *Foo) GetDescription() string {
 	return ""
 }
 
+func (x *Foo) GetAge() int32 {
+	if x != nil {
+		return x.Age
+	}
+	return 0
+}
+
 var File_examples_foo_proto protoreflect.FileDescriptor
 
 const file_examples_foo_proto_rawDesc = "" +
 	"\n" +
-	"\x12examples/foo.proto\x12\x03foo\";\n" +
+	"\x12examples/foo.proto\x12\x03foo\"M\n" +
 	"\x03Foo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescriptionb\x06proto3"
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
+	"\x03age\x18\x03 \x01(\x05R\x03ageb\x06proto3"
 
 var (
 	file_examples_foo_proto_rawDescOnce sync.Once

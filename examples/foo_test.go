@@ -10,7 +10,18 @@ func TestFoo(t *testing.T) {
 		Name: "test",
 		Description: "testdesc",
 	}
-	if foo.String() != "name:\"test\"  description:\"testdesc\"" {
-		t.Errorf("Foo.String() = %s, want %s", foo.String(), "name:\"test\" description:\"testdesc\"")
+
+	msg := foo.ProtoReflect()
+	fields := msg.Descriptor().Fields()
+	if got, want := fields.Len(), 3; got != want {
+		t.Fatalf("field count = %d, want %d", got, want)
+	}
+
+	if got, want := msg.Get(fields.Get(0)).String(), "test"; got != want {
+		t.Errorf("name = %q, want %q", got, want)
+	}
+
+	if got, want := msg.Get(fields.Get(1)).String(), "testdesc"; got != want {
+		t.Errorf("description = %q, want %q", got, want)
 	}
 }
