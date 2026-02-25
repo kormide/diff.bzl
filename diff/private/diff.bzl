@@ -66,12 +66,11 @@ def _diff_rule_impl(ctx):
 
     # If both inputs are generated, there's no writable file to patch.
     is_copy_to_source = ctx.file.file1.is_source or ctx.file.file2.is_source
-    outputs = [ctx.outputs.patch, ctx.outputs.exit_code]
     ctx.actions.run_shell(
         inputs = [ctx.file.file1, ctx.file.file2] + diffinfo.tool_files,
-        outputs = outputs,
+        outputs = [ctx.outputs.patch, ctx.outputs.exit_code],
         command = command,
-        mnemonic = "DiffutilsDiff",
+        mnemonic = "Diff",
         progress_message = "Diffing %{input} to %{output}",
     )
 
@@ -82,11 +81,11 @@ def _diff_rule_impl(ctx):
         ERROR: diff command exited with non-zero status.
 
         To accept the diff, run:
-        patch -d \\$(bazel info workspace) -p0 < {patch}
-        """.format(patch = ctx.outputs.patch.path)))
+        patch -d \\$(bazel info workspace) -p0 < \\$(bazel info bazel-bin)/{patch}
+        """.format(patch = ctx.outputs.patch.short_path)))
 
     return [
-        DefaultInfo(files = depset(outputs)),
+        DefaultInfo(files = depset([ctx.file.file1])),
         OutputGroupInfo(
             _validation = depset(validation_outputs),
             # By reading the Build Events, a Bazel wrapper can identify this diff output group and apply the patch.
