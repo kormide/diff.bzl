@@ -13,6 +13,11 @@ concurrency:
   # See https://docs.github.com/en/actions/using-jobs/using-concurrency and https://docs.github.com/en/actions/learn-github-actions/contexts for more info.
   group: concurrency-group::${{ github.workflow }}::${{ github.event.pull_request.number > 0 && format('pr-{0}', github.event.pull_request.number) || github.ref_name }}${{ github.ref_name == 'main' && format('::{0}', github.run_id) || ''}}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -29,8 +34,27 @@ jobs:
       USE_BAZEL_VERSION: ${{ matrix.bazel }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Important: checkout the PR HEAD ref so we can push commits to it.
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
       - uses: bazel-contrib/setup-bazel@0.18.0
+        with:
+          # just needed for Bazel 8 performance
+          bazelrc: common --incompatible_enable_proto_toolchain_resolution
       - run: bazel test //...
+      # Simulate what Aspect Workflows could do
+      # Run the build with patches requested, then apply them and run the tests again
+      - if: failure()
+        run: |
+          ./examples/test.sh //examples/...
+          git config --global user.email "marvin@aspect.build"
+          git config --global user.name "Marvin [bot]"
+          git commit -a -m "fix: apply patches"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   pre-commit:
     runs-on: ubuntu-latest
