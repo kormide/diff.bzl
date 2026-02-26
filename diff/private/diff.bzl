@@ -77,7 +77,15 @@ def _diff_rule_impl(ctx):
 
     validation_outputs = [_validate_diff_binary(ctx)]
     copy_to_source_outputs = [ctx.outputs.patch] if is_copy_to_source else []
-    if ctx.attr.validate or ctx.attr._options[DiffOptionsInfo].validate_diffs:
+
+    if ctx.attr.validate == 1:
+        validate = True
+    elif ctx.attr.validate == 0:
+        validate = False
+    else:
+        validate = ctx.attr._options[DiffOptionsInfo].validate_diffs
+
+    if validate:
         validation_outputs.append(_validate_exit_code(ctx, ctx.outputs.exit_code, """\
         ERROR: diff command exited with non-zero status.
 
@@ -121,13 +129,18 @@ diff_rule = rule(
             """,
             mandatory = True,
         ),
-        "validate": attr.bool(
+        "validate": attr.int(
             doc = """\
-              If true, the diff command is validated to ensure it exits with 0.
-              To enable this behavior for the whole build, run Bazel with --@diff.bzl//diff:validate_diffs.
+              Whether to treat a non-zero diff exit as a build validation failure.
+
+              -1: default to the flag value --@diff.bzl//diff:validate_diffs
+               0: never validate
+               1: always validate
 
               An individual Bazel invocation can run with --norun_validations to skip this behavior.
             """,
+            default = -1,
+            values = [-1, 0, 1],
         ),
         "_options": attr.label(default = "//diff:diff_options"),
     },

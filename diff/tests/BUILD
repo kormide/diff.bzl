@@ -73,7 +73,7 @@ diff(
     file2 = partial.make(
         copy_to_directory,  # Create an empty directory
     ),
-    validate = True,
+    validate = 1,
 )
 
 build_test(
