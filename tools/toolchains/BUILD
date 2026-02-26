@@ -1,6 +1,6 @@
-load("@diff.bzl//diff:toolchain.bzl", "diff_toolchain")
+load("@diff.bzl//diff:toolchain.bzl", "diffutils_toolchain")
 
-diff_toolchain(
+diffutils_toolchain(
     name = "diffutils_toolchain",
     diff_tool = "@diffutils//:diff",
 )

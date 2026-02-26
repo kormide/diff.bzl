@@ -3,7 +3,7 @@
 load("//diff/private:options.bzl", "DiffOptionsInfo")
 
 # We run diff in actions, so we want to use the execution platform toolchain.
-DIFF_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
+DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
 def _validate_diff_binary(ctx):
     """Validate that the diff binary is GNU diffutils.
@@ -18,7 +18,7 @@ def _validate_diff_binary(ctx):
         The output file containing the validation result, which must be placed in a _validation output group.
     """
     is_bsd_diff = ctx.actions.declare_file(ctx.label.name + ".is_bsd_diff")
-    diffinfo = ctx.toolchains[DIFF_TOOLCHAIN_TYPE].diffinfo
+    diffinfo = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffinfo
     ctx.actions.run_shell(
         inputs = diffinfo.tool_files,
         outputs = [is_bsd_diff],
@@ -54,7 +54,7 @@ def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with b
     return exit_code_valid
 
 def _diff_rule_impl(ctx):
-    diffinfo = ctx.toolchains[DIFF_TOOLCHAIN_TYPE].diffinfo
+    diffinfo = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffinfo
     command = "{} {} {} {} > {}; echo $? > {}".format(
         diffinfo.diff_path,
         " ".join(ctx.attr.args),
@@ -131,5 +131,5 @@ diff_rule = rule(
         ),
         "_options": attr.label(default = "//diff:diff_options"),
     },
-    toolchains = [DIFF_TOOLCHAIN_TYPE],
+    toolchains = [DIFFUTILS_TOOLCHAIN_TYPE],
 )
