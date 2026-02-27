@@ -49,8 +49,8 @@ jobs:
       - if: failure()
         run: |
           ./examples/test.sh //examples/...
-          git config --global user.email "marvin@aspect.build"
-          git config --global user.name "Marvin [bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           git commit -a -m "fix: apply patches"
           git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
         env:
