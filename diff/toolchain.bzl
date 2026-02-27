@@ -11,7 +11,7 @@ DiffutilsInfo = provider(
     },
 )
 
-def _diff_toolchain_impl(ctx):
+def _diffutils_toolchain_impl(ctx):
     if ctx.attr.diff_tool and ctx.attr.diff_path:
         fail("Can only set one of diff_tool or diff_path but both were set.")
     if not ctx.attr.diff_tool and not ctx.attr.diff_path:
@@ -51,8 +51,8 @@ def _diff_toolchain_impl(ctx):
         template_variables,
     ]
 
-diff_toolchain = rule(
-    implementation = _diff_toolchain_impl,
+diffutils_toolchain = rule(
+    implementation = _diffutils_toolchain_impl,
     attrs = {
         "diff_tool": attr.label(
             doc = "A hermetically downloaded executable target for the target platform.",
