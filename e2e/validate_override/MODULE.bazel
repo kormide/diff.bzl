@@ -1,0 +1,9 @@
+bazel_dep(name = "diff.bzl")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+
+local_path_override(
+    module_name = "diff.bzl",
+    path = "../..",
+)
+
+register_toolchains("//tools/toolchains:all")
