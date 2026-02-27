@@ -81,8 +81,8 @@ def _diff_rule_impl(ctx):
         ERROR: diff command exited with non-zero status.
 
         To accept the diff, run:
-        patch -d \\$(bazel info workspace) -p0 < \\$(bazel info bazel-bin)/{patch}
-        """.format(patch = ctx.outputs.patch.short_path)))
+        patch -d \\$(bazel info workspace) -p0 < \\$(bazel info workspace)/{patch}
+        """.format(patch = ctx.outputs.patch.path)))
 
     return [
         DefaultInfo(files = depset([ctx.file.file1])),
