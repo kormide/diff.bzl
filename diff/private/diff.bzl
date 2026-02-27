@@ -70,7 +70,7 @@ def _diff_rule_impl(ctx):
         inputs = [ctx.file.file1, ctx.file.file2] + diffinfo.tool_files,
         outputs = [ctx.outputs.patch, ctx.outputs.exit_code],
         command = command,
-        mnemonic = "Diff",
+        mnemonic = "DiffutilsDiff",
         progress_message = "Diffing %{input} to %{output}",
     )
 
