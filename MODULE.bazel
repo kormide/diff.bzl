@@ -15,7 +15,8 @@ bazel_dep(name = "diffutils", version = "3.12", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.2.1", dev_dependency = True)
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.6.0", dev_dependency = True)
 
-register_toolchains(
-    "//tools/toolchains:all",
-    dev_dependency = True,
-)
+diffutils = use_extension("//diff:extensions.bzl", "diffutils")
+diffutils.toolchain()
+use_repo(diffutils, "diffutils_toolchains")
+
+register_toolchains("@diffutils_toolchains//:all")
