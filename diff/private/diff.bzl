@@ -5,38 +5,6 @@ load("//diff/private:options.bzl", "DiffOptionsInfo")
 # We run diff in actions, so we want to use the execution platform toolchain.
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
-def _validate_diff_binary(ctx):
-    """Validate that the diff binary is GNU diffutils.
-
-    This is to avoid issues in case of a wrong toolchain registration
-    or a non-hermetic system dependency.
-    Note that this action is trivially a cache hit, so it shouldn't run frequently.
-
-    Args:
-        ctx: The context of the rule.
-    Returns:
-        The output file containing the validation result, which must be placed in a _validation output group.
-    """
-    is_bsd_diff = ctx.actions.declare_file(ctx.label.name + ".is_bsd_diff")
-    diffinfo = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffinfo
-    ctx.actions.run_shell(
-        inputs = diffinfo.tool_files,
-        outputs = [is_bsd_diff],
-        command = """\
-        {diff_bin} --version > {validation_output}
-        grep -q "GNU" {validation_output} || {{
-          echo 'ERROR: diff is not GNU diffutils:'
-          cat {validation_output}
-          echo 'run Bazel with --norun_validations to ignore this error'
-          exit 1
-        }} >&2
-        """.format(
-            diff_bin = diffinfo.diff_path,
-            validation_output = is_bsd_diff.path,
-        ),
-    )
-    return is_bsd_diff
-
 def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with bad status", code = 0):
     exit_code_valid = ctx.actions.declare_file(exit_code_file.path + ".valid")
     ctx.actions.run_shell(
@@ -54,9 +22,9 @@ def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with b
     return exit_code_valid
 
 def _diff_rule_impl(ctx):
-    diffinfo = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffinfo
+    DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
     command = "{} {} {} {} > {}; echo $? > {}".format(
-        diffinfo.diff_path,
+        DIFF_BIN.path,
         " ".join(ctx.attr.args),
         ctx.file.file1.path,
         ctx.file.file2.path,
@@ -68,14 +36,16 @@ def _diff_rule_impl(ctx):
     is_copy_to_source = ctx.file.file1.is_source or ctx.file.file2.is_source
     outputs = [ctx.outputs.patch, ctx.outputs.exit_code]
     ctx.actions.run_shell(
-        inputs = [ctx.file.file1, ctx.file.file2] + diffinfo.tool_files,
+        inputs = [ctx.file.file1, ctx.file.file2],
         outputs = outputs,
         command = command,
         mnemonic = "DiffutilsDiff",
         progress_message = "Diffing %{input} to %{output}",
+        tools = [DIFF_BIN],
+        toolchain = "@diff.bzl//diffutils/toolchain:execution_type",
     )
 
-    validation_outputs = [_validate_diff_binary(ctx)]
+    validation_outputs = []
     copy_to_source_outputs = [ctx.outputs.patch] if is_copy_to_source else []
     if ctx.attr.validate or ctx.attr._options[DiffOptionsInfo].validate_diffs:
         validation_outputs.append(_validate_exit_code(ctx, ctx.outputs.exit_code, """\
