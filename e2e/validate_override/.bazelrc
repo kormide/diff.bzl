@@ -1,0 +1,1 @@
+common --@diff.bzl//diff:validate_diffs=true
