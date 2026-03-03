@@ -1,4 +1,8 @@
 import %workspace%/tools/preset.bazelrc
+common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
+
+# Cause a build failure when files in the source tree don't match their generated counterparts.
+common --@diff.bzl//diff:validate_diffs
 
 # Don’t want to push a rules author to update their deps if not needed.
 # https://bazel.build/reference/command-line-reference#flag--check_direct_dependencies
