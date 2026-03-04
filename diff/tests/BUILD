@@ -76,6 +76,14 @@ diff(
     validate = 1,
 )
 
+genrule(
+    name = "case.5",
+    srcs = [],
+    outs = ["case.5.txt"],
+    cmd = "$(DIFF_BIN) --help > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+
 build_test(
     name = "build_test",
     targets = [
