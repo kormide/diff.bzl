@@ -5,7 +5,7 @@ load("//diff/private:options.bzl", "DiffOptionsInfo")
 # We run diff in actions, so we want to use the execution platform toolchain.
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
-def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with bad status", code = 0):
+def _validate_no_diff(ctx, exit_code_file, error_message):
     exit_code_valid = ctx.actions.declare_file(exit_code_file.path + ".valid")
     ctx.actions.run_shell(
         inputs = [exit_code_file],
@@ -13,17 +13,25 @@ def _validate_exit_code(ctx, exit_code_file, error_message = "Diff exited with b
         # assert that the input file first character is 0
         command = """
         touch {}
-        if [ $(head -c 1 {}) != '{}' ]; then
+        if [ $(head -c 1 {}) != '0' ]; then
             >&2 echo "{}"
             exit 1
         fi
-        """.format(exit_code_valid.path, ctx.outputs.exit_code.path, code, error_message),
+        """.format(exit_code_valid.path, ctx.outputs.exit_code.path, error_message),
     )
     return exit_code_valid
 
 def _diff_rule_impl(ctx):
     DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
-    command = "{} {} {} {} > {}; echo $? > {}".format(
+
+    command = """\
+{} {} {} {} > {}
+EXIT_CODE=$?
+if [[ $EXIT_CODE == '2' ]]; then
+    exit 2
+fi
+echo $EXIT_CODE > {}
+""".format(
         DIFF_BIN.path,
         " ".join(ctx.attr.args),
         ctx.file.file1.path,
@@ -56,7 +64,7 @@ def _diff_rule_impl(ctx):
         validate = ctx.attr._options[DiffOptionsInfo].validate_diffs
 
     if validate:
-        validation_outputs.append(_validate_exit_code(ctx, ctx.outputs.exit_code, """\
+        validation_outputs.append(_validate_no_diff(ctx, ctx.outputs.exit_code, """\
         ERROR: diff command exited with non-zero status.
 
         To accept the diff, run:
@@ -86,6 +94,7 @@ diff_rule = rule(
         "exit_code": attr.output(
             doc = """\
               The exit status of the diff command is written to this file.
+              The written status may only be 0 or 1 as a 2 will fail the diff action.
 
               From 'man diff':
               > Exit status is 0 if inputs are the same, 1 if different, 2 if trouble.
@@ -100,7 +109,7 @@ diff_rule = rule(
         ),
         "validate": attr.int(
             doc = """\
-              Whether to treat a non-zero diff exit as a build validation failure.
+              Whether to treat a non-empty diff (exit 1) as a build validation failure.
 
               -1: default to the flag value --@diff.bzl//diff:validate_diffs
                0: never validate
