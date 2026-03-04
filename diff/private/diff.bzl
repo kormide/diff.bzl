@@ -83,7 +83,6 @@ diff_rule = rule(
         ),
         "file1": attr.label(allow_single_file = True),
         "file2": attr.label(allow_single_file = True),
-        "diff": attr.label(allow_single_file = True),
         "exit_code": attr.output(
             doc = """\
               The exit status of the diff command is written to this file.
