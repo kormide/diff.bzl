@@ -64,13 +64,13 @@ echo $EXIT_CODE > {}
         validate = ctx.attr._options[DiffOptionsInfo].validate_diffs
 
     if validate:
+        # NB: the error message we print here allows the user to be in any working directory.
         validation_outputs.append(_validate_no_diff(ctx, ctx.outputs.exit_code, """\
         ERROR: diff command exited with non-zero status.
 
         To accept the diff, run:
-        patch -d \\$(bazel info workspace) -p0 < {patch}
+        ( cd \\$(bazel info workspace); patch -p0 < {patch} )
         """.format(patch = ctx.outputs.patch.path)))
-
     return [
         DefaultInfo(files = depset(outputs)),
         OutputGroupInfo(
