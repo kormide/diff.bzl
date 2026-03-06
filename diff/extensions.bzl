@@ -11,7 +11,7 @@ effectively overriding the default named toolchain due to toolchain resolution p
 """
 
 load("//diff/private:versions.bzl", "LATEST_VERSION")
-load(":repositories.bzl", "diffutils_register_toolchains")
+load(":repositories.bzl", "diffutils_host_alias_repo", "diffutils_register_toolchains")
 
 _DEFAULT_NAME = "diffutils"
 DEFAULT_DIFFUTILS_VERSION = LATEST_VERSION
@@ -54,6 +54,8 @@ def _toolchain_extension(mctx):
             diffutils_version = selected,
             register = False,
         )
+
+        diffutils_host_alias_repo(name = name)
 
     return mctx.extension_metadata(
         reproducible = True,
