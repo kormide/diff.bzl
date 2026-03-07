@@ -21,6 +21,7 @@ jobs:
         bazel: ["8.x", "9.*"]
         folder:
           - .
+          - e2e/diffutils_from_source
           - e2e/smoke
           - e2e/validate_override
     defaults:
