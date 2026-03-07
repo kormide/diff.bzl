@@ -9,6 +9,7 @@ default_stages: [pre-commit]
 # as the default uses a very new version of GLIBC
 default_language_version:
   node: 16.18.0
+exclude: docs/.*\.md
 repos:
   - repo: meta
     hooks:
