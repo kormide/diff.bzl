@@ -63,7 +63,7 @@ fi
         # NB: the error message we print here allows the user to be in any working directory.
         msg = """
         To accept the diff, run:
-        ( cd \\$(bazel info workspace); patch -p0 < {patch} )
+        (cd \\$(bazel info workspace); patch -p0 < {patch})
         """.format(patch = ctx.outputs.patch.path) if ctx.file.file1.is_source else ""
 
         validation_outputs.append(_validate(ctx, """\

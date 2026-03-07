@@ -62,7 +62,7 @@ fi
         # NB: the error message we print here allows the user to be in any working directory.
         msg = """
         To replace file1, run:
-        ( cd \\$(bazel info workspace); cp {file2} {file1} )
+        (cd \\$(bazel info workspace); cp {file2} {file1})
         """.format(file1 = ctx.file.file1.path, file2 = ctx.file.file2.path) if ctx.file.file1.is_source else ""
 
         validation_outputs.append(_validate(ctx, """\
