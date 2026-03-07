@@ -3,18 +3,18 @@
 DiffOptionsInfo = provider(
     doc = "Global options for running diffs",
     fields = {
-        "validate_diffs": "whether to validate the diffs",
+        "validate": "whether to validate cmps, diffs, etc.",
     },
 )
 
 def _diff_options_impl(ctx):
     return DiffOptionsInfo(
-        validate_diffs = ctx.attr.validate_diffs,
+        validate = ctx.attr.validate,
     )
 
 diff_options = rule(
     implementation = _diff_options_impl,
     attrs = {
-        "validate_diffs": attr.bool(),
+        "validate": attr.bool(),
     },
 )
