@@ -22,7 +22,8 @@ jobs:
         folder:
           - .
           - e2e/smoke
-          - e2e/validate_override
+          - e2e/cmp_validate_override
+          - e2e/diff_validate_override
     defaults:
       run:
         working-directory: ${{ matrix.folder }}
