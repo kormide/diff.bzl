@@ -3,6 +3,19 @@ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("//diff/private:options.bzl", "diff_options")
 
 bool_flag(
+    name = "validate_cmps",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "validate_cmps.enabled",
+    flag_values = {
+        ":validate_cmps": "True",
+    },
+)
+
+bool_flag(
     name = "validate_diffs",
     build_setting_default = False,
     visibility = ["//visibility:public"],
@@ -17,6 +30,10 @@ config_setting(
 
 diff_options(
     name = "diff_options",
+    validate_cmps = select({
+        ":validate_cmps.enabled": True,
+        "//conditions:default": False,
+    }),
     validate_diffs = select({
         ":validate_diffs.enabled": True,
         "//conditions:default": False,
@@ -29,6 +46,7 @@ bzl_library(
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//diff/private:cmp",
         "//diff/private:diff",
         "@bazel_skylib//lib:partial",
     ],
