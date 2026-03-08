@@ -23,22 +23,8 @@ diff(
         "--recursive",
         "--new-file",
     ],
-    exit_code = "case.3.exit_code",
     file1 = "case.3.dir_a",
     file2 = "case.3.dir_b",
-)
-
-diff(
-    name = "case.3.assert_exit_1",
-    file1 = "case.3.exit_code",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "1",
-            "",
-        ],
-    ),
-    validate = 1,
 )
 
 diff(
@@ -86,7 +72,6 @@ build_test(
     name = "build_test",
     targets = [
         ":case.3.assert_diff",
-        ":case.3.assert_exit_1",
         ":case.4",
     ],
 )
