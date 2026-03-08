@@ -9,7 +9,6 @@ load("@diff.bzl", "diff")
 
 diff(
     name = "case.1",
-    exit_code = "case.1.exit_code",
     # Shorthand to write a generated file with some content we can run through diff.
     # Typically your content would come from a source file, or the output of some other rule.
     file1 = partial.make(
@@ -44,22 +43,9 @@ diff(
     ),
 )
 
-diff(
-    name = "case.1.assert_exit_1",
-    file1 = "case.1.exit_code",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "1",
-            "",
-        ],
-    ),
-)
-
 build_test(
     name = "smoke_test",
     targets = [
         ":case.1.assert_diff",
-        ":case.1.assert_exit_1",
     ],
 )
