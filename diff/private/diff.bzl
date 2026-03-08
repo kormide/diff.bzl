@@ -40,8 +40,6 @@ echo $EXIT_CODE > {}
         ctx.outputs.exit_code.path,
     )
 
-    # If both inputs are generated, there's no writable file to patch.
-    is_copy_to_source = ctx.file.file1.is_source or ctx.file.file2.is_source
     outputs = [ctx.outputs.patch, ctx.outputs.exit_code]
     ctx.actions.run_shell(
         inputs = [ctx.file.file1, ctx.file.file2],
@@ -54,7 +52,7 @@ echo $EXIT_CODE > {}
     )
 
     validation_outputs = []
-    copy_to_source_outputs = [ctx.outputs.patch] if is_copy_to_source else []
+    source_patch_outputs = [ctx.outputs.patch] if ctx.file.file1.is_source else []
 
     if ctx.attr.validate == 1:
         validate = True
@@ -64,19 +62,22 @@ echo $EXIT_CODE > {}
         validate = ctx.attr._options[DiffOptionsInfo].validate_diffs
 
     if validate:
-        validation_outputs.append(_validate_no_diff(ctx, ctx.outputs.exit_code, """\
-        ERROR: diff command exited with non-zero status.
-
+        # It only makes sense to patch if file1 is a source file.
+        msg = """
         To accept the diff, run:
         patch -d \\$(bazel info workspace) -p0 < {patch}
-        """.format(patch = ctx.outputs.patch.path)))
+        """.format(patch = ctx.outputs.patch.path) if ctx.file.file1.is_source else ""
+
+        validation_outputs.append(_validate_no_diff(ctx, ctx.outputs.exit_code, """\
+        ERROR: diff command exited with non-zero status.
+        {msg}""".format(msg = msg)))
 
     return [
         DefaultInfo(files = depset(outputs)),
         OutputGroupInfo(
             _validation = depset(validation_outputs),
             # By reading the Build Events, a Bazel wrapper can identify this diff output group and apply the patch.
-            diff_bzl__patch = depset(copy_to_source_outputs),
+            diff_bzl__patch = depset(source_patch_outputs),
         ),
     ]
 
