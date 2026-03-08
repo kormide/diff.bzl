@@ -1,0 +1,15 @@
+load("@diff.bzl//diff:toolchain.bzl", "diffutils_toolchain")
+
+diffutils_toolchain(
+    name = "from_source",
+    cmp_bin = "@diffutils//:cmp",
+    diff3_bin = "@diffutils//:diff3",
+    diff_bin = "@diffutils//:diff",
+    sdiff_bin = "@diffutils//:sdiff",
+)
+
+toolchain(
+    name = "diffutils_toolchain",
+    toolchain = ":from_source",
+    toolchain_type = "@diff.bzl//diff/toolchain:execution_type",
+)

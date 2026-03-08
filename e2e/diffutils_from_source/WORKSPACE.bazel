@@ -1,0 +1,9 @@
+# Override http_archive for local testing
+local_repository(
+    name = "diff.bzl",
+    path = "../..",
+)
+
+#---SNIP--- Below here is re-used in the workspace snippet published on releases
+
+diff.bzl_dependencies()
