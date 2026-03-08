@@ -3,15 +3,14 @@
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("//diff/private:diff.bzl", "diff_rule")
 
-def diff(name, file1, file2, patch = None, exit_code = None, **kwargs):
-    """Runs a diff between two files and returns the exit code.
+def diff(name, file1, file2, patch = None, **kwargs):
+    """Runs a diff between two files and output the patch.
 
     Args:
         name: The name of the rule.
         file1: The first file to diff.
         file2: The second file to diff.
         patch: The output file to write the diff to. Defaults to <name>.patch.
-        exit_code: The output file to write the exit code to. Defaults to <name>.exit_code.
         **kwargs: Additional arguments to pass to the diff_rule.
     """
     if file1 and partial.is_instance(file1):
@@ -29,6 +28,5 @@ def diff(name, file1, file2, patch = None, exit_code = None, **kwargs):
         file1 = file1,
         file2 = file2,
         patch = patch or name + ".patch",
-        exit_code = exit_code or name + ".exit_code",
         **kwargs
     )
