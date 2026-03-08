@@ -1,0 +1,52 @@
+load("@stardoc//stardoc:stardoc.bzl", "stardoc")
+load("//diff:defs.bzl", "diff")
+
+stardoc(
+    name = "cmp_doc",
+    out = "cmp.md.out",
+    input = "//diff:defs.bzl",
+    symbol_names = ["cmp"],
+    visibility = ["//docs:__pkg__"],
+    deps = ["//diff:defs"],
+)
+
+diff(
+    name = "cmp",
+    args = ["--unified"],
+    file1 = "cmp.md",
+    file2 = ":cmp_doc",
+    validate = 1,
+)
+
+stardoc(
+    name = "diff_doc",
+    out = "diff.md.out",
+    input = "//diff:defs.bzl",
+    symbol_names = ["diff"],
+    visibility = ["//docs:__pkg__"],
+    deps = ["//diff:defs"],
+)
+
+diff(
+    name = "diff",
+    args = ["--unified"],
+    file1 = "diff.md",
+    file2 = ":diff_doc",
+    validate = 1,
+)
+
+stardoc(
+    name = "extensions_doc",
+    out = "extensions.md.out",
+    input = "//diff:extensions.bzl",
+    visibility = ["//docs:__pkg__"],
+    deps = ["//diff:extensions"],
+)
+
+diff(
+    name = "extensions",
+    args = ["--unified"],
+    file1 = "extensions.md",
+    file2 = ":extensions_doc",
+    validate = 1,
+)
