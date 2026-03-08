@@ -12,7 +12,7 @@ def _validate(ctx, error_message):
         # assert that the cmp output is empty
         command = """
         touch {}
-        if [ $(head -c 1 {}) != '' ]; then
+        if [ "$(head -c 1 {})" != "" ]; then
             >&2 echo "{}"
             exit 1
         fi
