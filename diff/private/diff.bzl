@@ -41,8 +41,26 @@ def _patch_cmd(type, source_file, patch_file):
         return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
     return None
 
+def _add_deterministic_label_args(args, file1, file2):
+    for arg in args:
+        arg = arg.lstrip(" ")
+        if arg.startswith("--label"):
+            # labels already set, don't interfere
+            return args
+
+    args = args[:]
+    args.extend(["--label", file1.short_path, "--label", file2.short_path])
+    return args
+
 def _diff_rule_impl(ctx):
     DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
+
+    type = _determine_patch_type(ctx.attr.args)
+    args = _add_deterministic_label_args(
+        ctx.attr.args,
+        ctx.file.file1,
+        ctx.file.file2,
+    ) if type == "context" or type == "unified" else ctx.attr.args
 
     command = """\
 {} {} {} {} > {}
@@ -51,7 +69,7 @@ if [[ $? == '2' ]]; then
 fi
 """.format(
         DIFF_BIN.path,
-        " ".join(ctx.attr.args),
+        " ".join(args),
         ctx.file.file1.path,
         ctx.file.file2.path,
         ctx.outputs.patch.path,
@@ -84,7 +102,6 @@ fi
         if ctx.file.file1.is_source:
             # Show a command to patch file1 if it's a source file.
             # NB: the error message we print here allows the user to be in any working directory.
-            type = _determine_patch_type(ctx.attr.args)
             patch_cmd = _patch_cmd(type, ctx.file.file1.path, ctx.outputs.patch.path)
             if patch_cmd != None:
                 patch_msg = """
