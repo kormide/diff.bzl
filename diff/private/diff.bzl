@@ -20,6 +20,27 @@ def _validate(ctx, error_message):
     )
     return diff_valid_file
 
+def _determine_patch_type(args):
+    for arg in args:
+        arg = arg.lstrip(" ")
+        if arg.lower().startswith("-c ") or arg.startswith("--context"):
+            return "context"
+        elif arg.lower().startswith("-u ") or arg.startswith("--unified"):
+            return "unified"
+        elif arg.startswith("--normal"):
+            return "normal"
+        elif arg.startswith("-q") or arg.startswith("--brief"):
+            return "brief"
+
+    return "normal"
+
+def _patch_cmd(type, source_file, patch_file):
+    if type == "normal":
+        return "(cd \\$(bazel info workspace); patch -p0 {} < {})".format(source_file, patch_file)
+    elif type == "context" or type == "unified":
+        return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
+    return None
+
 def _diff_rule_impl(ctx):
     DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
 
@@ -59,16 +80,21 @@ fi
         validate = ctx.attr._options[DiffOptionsInfo].validate
 
     if validate:
-        # Show a command to patch file1 if it's a source file.
-        # NB: the error message we print here allows the user to be in any working directory.
-        msg = """
-        To accept the diff, run:
-        (cd \\$(bazel info workspace); patch -p0 < {patch})
-        """.format(patch = ctx.outputs.patch.path) if ctx.file.file1.is_source else ""
+        patch_msg = ""
+        if ctx.file.file1.is_source:
+            # Show a command to patch file1 if it's a source file.
+            # NB: the error message we print here allows the user to be in any working directory.
+            type = _determine_patch_type(ctx.attr.args)
+            patch_cmd = _patch_cmd(type, ctx.file.file1.path, ctx.outputs.patch.path)
+            if patch_cmd != None:
+                patch_msg = """
+                To accept the diff, run:
+                {}
+                """.format(patch_cmd)
 
         validation_outputs.append(_validate(ctx, """\
         ERROR: diff command exited with non-zero status.
-        {msg}""".format(msg = msg)))
+        {}""".format(patch_msg)))
 
     return [
         DefaultInfo(files = depset(outputs)),
