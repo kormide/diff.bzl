@@ -34,7 +34,7 @@ def cmp(name, file1, file2, args = [], out = None, **kwargs):
         **kwargs
     )
 
-def diff(name, file1, file2, args = [], patch = None, **kwargs):
+def diff(name, file1, file2, args = ["--unified"], patch = None, **kwargs):
     """Runs a diff between two files and returns a patch.
 
     Args:
