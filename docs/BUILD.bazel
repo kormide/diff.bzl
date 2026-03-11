@@ -2,36 +2,22 @@ load("@stardoc//stardoc:stardoc.bzl", "stardoc")
 load("//diff:defs.bzl", "diff")
 
 stardoc(
-    name = "cmp_doc",
-    out = "cmp.md.out",
+    name = "rules_doc",
+    out = "rules.md.out",
     input = "//diff:defs.bzl",
-    symbol_names = ["cmp"],
+    symbol_names = [
+        "cmp",
+        "diff",
+    ],
     visibility = ["//docs:__pkg__"],
     deps = ["//diff:defs"],
 )
 
 diff(
-    name = "cmp",
+    name = "rules",
     args = ["--unified"],
-    file1 = "cmp.md",
-    file2 = ":cmp_doc",
-    validate = 1,
-)
-
-stardoc(
-    name = "diff_doc",
-    out = "diff.md.out",
-    input = "//diff:defs.bzl",
-    symbol_names = ["diff"],
-    visibility = ["//docs:__pkg__"],
-    deps = ["//diff:defs"],
-)
-
-diff(
-    name = "diff",
-    args = ["--unified"],
-    file1 = "diff.md",
-    file2 = ":diff_doc",
+    file1 = "rules.md",
+    file2 = ":rules_doc",
     validate = 1,
 )
 
