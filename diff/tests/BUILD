@@ -5,124 +5,7 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//diff:defs.bzl", "cmp", "diff")
 
 diff(
-    name = "case.2",
-    args = ["--unified"],
-    file1 = "some_file.txt",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "file2",
-            "",
-        ],
-    ),
-)
-
-diff(
-    name = "case.3",
-    args = [
-        "--recursive",
-        "--new-file",
-    ],
-    file1 = "case.3.dir_a",
-    file2 = "case.3.dir_b",
-)
-
-diff(
-    name = "case.3.assert_diff",
-    file1 = "case.3.patch",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "diff --recursive --new-file diff/tests/case.3.dir_a/cow.txt diff/tests/case.3.dir_b/cow.txt",
-            "0a1",
-            "> moo, moooooo!",
-            "diff --recursive --new-file diff/tests/case.3.dir_a/file.txt diff/tests/case.3.dir_b/file.txt",
-            "1a2",
-            "> goodbye",
-            "",
-        ],
-    ),
-    validate = 1,
-)
-
-diff(
-    name = "case.4",
-    args = [
-        "--recursive",
-        "--unified",
-    ],
-    file1 = partial.make(
-        copy_to_directory,  # Create an empty directory
-    ),
-    file2 = partial.make(
-        copy_to_directory,  # Create an empty directory
-    ),
-    validate = 1,
-)
-
-genrule(
-    name = "case.5",
-    srcs = [],
-    outs = ["case.5.txt"],
-    cmd = "$(DIFF_BIN) --help > $@",
-    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
-)
-
-cmp(
-    name = "case.6.same_binary_file",
-    file1 = "case.6.a",
-    file2 = "case.6.b",
-    validate = 1,
-)
-
-cmp(
-    name = "case.7.different_binary_files",
-    file1 = "case.7.a",
-    file2 = "case.7.b",
-)
-
-diff(
-    name = "case.7.output",
-    file1 = "case.7.different_binary_files.out",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "diff/tests/case.7.a diff/tests/case.7.b differ: char 1, line 1",
-            "",
-        ],
-    ),
-    validate = 1,
-)
-
-cmp(
-    name = "case.8.verbose",
-    args = ["--verbose"],
-    file1 = "case.8.a",
-    file2 = "case.8.b",
-)
-
-diff(
-    name = "case.8.output",
-    file1 = "case.8.verbose.out",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "1 125  10",
-            "2 142  77",
-            "3  46 171",
-            "4  41 312",
-            "5  62 134",
-            "6 315 353",
-            "7 231 360",
-            "8 231 167",
-            "",
-        ],
-    ),
-    validate = 1,
-)
-
-diff(
-    name = "case.9.normal",
+    name = "case_normal",
     args = ["--normal"],
     file1 = partial.make(
         write_file,
@@ -141,23 +24,40 @@ diff(
 )
 
 diff(
-    name = "case.9.diff",
-    file1 = ":case.9.normal",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "1c1",
-            "< moo",
-            "---",
-            "> cow",
-            "",
-        ],
-    ),
+    name = "case_normal_assert_patch",
+    file1 = "case_normal.golden.patch",
+    file2 = ":case_normal",
     validate = 1,
 )
 
 diff(
-    name = "case.10.context_deterministic_label",
+    name = "case_unified",
+    args = ["--unified"],
+    file1 = partial.make(
+        write_file,
+        content = [
+            "moo",
+            "",
+        ],
+    ),
+    file2 = partial.make(
+        write_file,
+        content = [
+            "cow",
+            "",
+        ],
+    ),
+)
+
+diff(
+    name = "case_unified_assert_patch",
+    file1 = "case_unified.golden.patch",
+    file2 = ":case_unified",
+    validate = 1,
+)
+
+diff(
+    name = "case_context",
     args = ["--context"],
     file1 = partial.make(
         write_file,
@@ -176,18 +76,107 @@ diff(
 )
 
 diff(
-    name = "case.10.diff",
-    file1 = ":case.10.context_deterministic_label",
+    name = "case_context_assert_patch",
+    file1 = "case_context.golden.patch",
+    file2 = ":case_context",
+    validate = 1,
+)
+
+diff(
+    name = "case_recursive",
+    args = [
+        "--recursive",
+        "--new-file",
+    ],
+    file1 = "case_recursive.dir_a",
+    file2 = "case_recursive.dir_b",
+)
+
+diff(
+    name = "case_recursive_assert_patch",
+    file1 = "case_recursive.golden.patch",
+    file2 = ":case_recursive",
+    validate = 1,
+)
+
+diff(
+    name = "case_recursive_empty_dirs",
+    args = [
+        "--recursive",
+        "--unified",
+    ],
+    file1 = partial.make(
+        copy_to_directory,  # Create an empty directory
+    ),
+    file2 = partial.make(
+        copy_to_directory,  # Create an empty directory
+    ),
+    validate = 1,
+)
+
+genrule(
+    name = "case_diff_genrule",
+    srcs = [],
+    outs = ["diff_help.txt"],
+    cmd = "$(DIFF_BIN) --help > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+
+genrule(
+    name = "case_cmp_genrule",
+    srcs = [],
+    outs = ["cmp_help.txt"],
+    cmd = "$(CMP_BIN) --help > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+
+cmp(
+    name = "case_cmp_same_binary",
+    file1 = "case_cmp_same_binary.a",
+    file2 = "case_cmp_same_binary.b",
+    validate = 1,
+)
+
+cmp(
+    name = "case_cmp_different_binary",
+    file1 = "case_cmp_different_binary.a",
+    file2 = "case_cmp_different_binary.b",
+)
+
+diff(
+    name = "case_cmp_different_binary_assert_output",
+    file1 = ":case_cmp_different_binary",
     file2 = partial.make(
         write_file,
         content = [
-            "*** diff/tests/case.10.context_deterministic_label.file1.in",
-            "--- diff/tests/case.10.context_deterministic_label.file2.in",
-            "***************",
-            "*** 1 ****",
-            "! moo",
-            "--- 1 ----",
-            "! cow",
+            "diff/tests/case_cmp_different_binary.a diff/tests/case_cmp_different_binary.b differ: char 1, line 1",
+            "",
+        ],
+    ),
+    validate = 1,
+)
+
+cmp(
+    name = "case_cmp_verbose",
+    args = ["--verbose"],
+    file1 = "case_cmp_verbose.a",
+    file2 = "case_cmp_verbose.b",
+)
+
+diff(
+    name = "case_cmp_verbose_assert_output",
+    file1 = ":case_cmp_verbose",
+    file2 = partial.make(
+        write_file,
+        content = [
+            "1 125  10",
+            "2 142  77",
+            "3  46 171",
+            "4  41 312",
+            "5  62 134",
+            "6 315 353",
+            "7 231 360",
+            "8 231 167",
             "",
         ],
     ),
@@ -197,7 +186,21 @@ diff(
 build_test(
     name = "build_test",
     targets = [
-        ":case.3.assert_diff",
-        ":case.4",
+        ":case_normal",
+        ":case_normal_assert_patch",
+        ":case_unified",
+        ":case_unified_assert_patch",
+        ":case_context",
+        ":case_context_assert_patch",
+        ":case_recursive",
+        ":case_recursive_assert_patch",
+        ":case_recursive_empty_dirs",
+        ":case_diff_genrule",
+        ":case_cmp_genrule",
+        ":case_cmp_same_binary",
+        ":case_cmp_different_binary",
+        ":case_cmp_different_binary_assert_output",
+        ":case_cmp_verbose",
+        ":case_cmp_verbose_assert_output",
     ],
 )

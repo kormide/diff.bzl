@@ -1,0 +1,7 @@
+*** diff/tests/case_context.file1.in
+--- diff/tests/case_context.file2.in
+***************
+*** 1 ****
+! moo
+--- 1 ----
+! cow
