@@ -24,13 +24,10 @@ tar --create --auto-compress \
     --file "$GITHUB_WORKSPACE/${ARCHIVE%.tar.gz}.docs.tar.gz" .
 
 cat << EOF
-## Using Bzlmod with Bazel 6 or greater
+## Bzlmod
 
-1. (Bazel 6 only) Enable with \`common --enable_bzlmod\` in \`.bazelrc\`.
-2. Add to your \`MODULE.bazel\` file:
+Add to your \`MODULE.bazel\` file:
 
 \`\`\`starlark
 bazel_dep(name = "diff.bzl", version = "${TAG:1}")
 \`\`\`
-
-echo "\`\`\`"
