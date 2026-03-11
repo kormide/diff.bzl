@@ -35,6 +35,6 @@ diff(
 
 See [Patching source files](./docs/patching_source_files.md).
 
-### Support automatic patch workflows in CI
+### Support automatic patch workflows for CI
 
-This ruleset outputs patches into a special `diff_bzl__patch` output group allowing the patches to be collected and then applied using automation. See the [build & patch](./examples/build-and-patch.sh) example script.
+This ruleset outputs patches into a distinct `diff_bzl__patch` output group making it easier for patches to be collected and then applied using automation. See the [build & patch](./examples/build-and-patch.sh) example script.
