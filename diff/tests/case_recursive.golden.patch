@@ -1,0 +1,6 @@
+diff --recursive --new-file diff/tests/case_recursive.dir_a/cow.txt diff/tests/case_recursive.dir_b/cow.txt
+0a1
+> moo, moooooo!
+diff --recursive --new-file diff/tests/case_recursive.dir_a/file.txt diff/tests/case_recursive.dir_b/file.txt
+1a2
+> goodbye

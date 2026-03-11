@@ -1,0 +1,5 @@
+--- diff/tests/case_unified.file1.in
++++ diff/tests/case_unified.file2.in
+@@ -1 +1 @@
+-moo
++cow

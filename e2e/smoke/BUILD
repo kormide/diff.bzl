@@ -8,7 +8,7 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@diff.bzl", "diff")
 
 diff(
-    name = "case.1",
+    name = "patch",
     # Shorthand to write a generated file with some content we can run through diff.
     # Typically your content would come from a source file, or the output of some other rule.
     file1 = partial.make(
@@ -25,12 +25,11 @@ diff(
             "",
         ],
     ),
-    patch = "case.1.patch",
 )
 
 diff(
-    name = "case.1.assert_diff",
-    file1 = "case.1.patch",
+    name = "validate",
+    file1 = ":patch",
     file2 = partial.make(
         write_file,
         content = [
@@ -46,6 +45,7 @@ diff(
 build_test(
     name = "smoke_test",
     targets = [
-        ":case.1.assert_diff",
+        ":patch",
+        ":validate",
     ],
 )
