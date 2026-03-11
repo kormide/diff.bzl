@@ -121,6 +121,79 @@ diff(
     validate = 1,
 )
 
+diff(
+    name = "case.9.normal",
+    args = ["--normal"],
+    file1 = partial.make(
+        write_file,
+        content = [
+            "moo",
+            "",
+        ],
+    ),
+    file2 = partial.make(
+        write_file,
+        content = [
+            "cow",
+            "",
+        ],
+    ),
+)
+
+diff(
+    name = "case.9.diff",
+    file1 = ":case.9.normal",
+    file2 = partial.make(
+        write_file,
+        content = [
+            "1c1",
+            "< moo",
+            "---",
+            "> cow",
+            "",
+        ],
+    ),
+    validate = 1,
+)
+
+diff(
+    name = "case.10.context_deterministic_label",
+    args = ["--context"],
+    file1 = partial.make(
+        write_file,
+        content = [
+            "moo",
+            "",
+        ],
+    ),
+    file2 = partial.make(
+        write_file,
+        content = [
+            "cow",
+            "",
+        ],
+    ),
+)
+
+diff(
+    name = "case.10.diff",
+    file1 = ":case.10.context_deterministic_label",
+    file2 = partial.make(
+        write_file,
+        content = [
+            "*** diff/tests/case.10.context_deterministic_label.file1.in",
+            "--- diff/tests/case.10.context_deterministic_label.file2.in",
+            "***************",
+            "*** 1 ****",
+            "! moo",
+            "--- 1 ----",
+            "! cow",
+            "",
+        ],
+    ),
+    validate = 1,
+)
+
 build_test(
     name = "build_test",
     targets = [
