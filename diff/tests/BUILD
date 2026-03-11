@@ -87,6 +87,7 @@ diff(
     args = [
         "--recursive",
         "--new-file",
+        "--unified",
     ],
     file1 = "case_recursive.dir_a",
     file2 = "case_recursive.dir_b",

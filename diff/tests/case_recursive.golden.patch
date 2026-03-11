@@ -1,6 +1,11 @@
-diff --recursive --new-file diff/tests/case_recursive.dir_a/cow.txt diff/tests/case_recursive.dir_b/cow.txt
-0a1
-> moo, moooooo!
-diff --recursive --new-file diff/tests/case_recursive.dir_a/file.txt diff/tests/case_recursive.dir_b/file.txt
-1a2
-> goodbye
+diff --recursive --new-file --unified --label diff/tests/case_recursive.dir_a --label diff/tests/case_recursive.dir_b diff/tests/case_recursive.dir_a diff/tests/case_recursive.dir_b
+--- diff/tests/case_recursive.dir_a
++++ diff/tests/case_recursive.dir_b
+@@ -0,0 +1 @@
++moo, moooooo!
+diff --recursive --new-file --unified --label diff/tests/case_recursive.dir_a --label diff/tests/case_recursive.dir_b diff/tests/case_recursive.dir_a diff/tests/case_recursive.dir_b
+--- diff/tests/case_recursive.dir_a
++++ diff/tests/case_recursive.dir_b
+@@ -1 +1,2 @@
+ hello
++goodbye
