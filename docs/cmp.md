@@ -19,11 +19,11 @@ Runs cmp (binary diff) between two files and returns the output.
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="cmp-name"></a>name |  The name of the rule.   |  none |
-| <a id="cmp-file1"></a>file1 |  The first file to cmp.   |  none |
-| <a id="cmp-file2"></a>file2 |  The second file to cmp.   |  none |
-| <a id="cmp-args"></a>args |  Additional arguments to pass to cmp.   |  `[]` |
+| <a id="cmp-name"></a>name |  The name of the rule   |  none |
+| <a id="cmp-file1"></a>file1 |  The first file to compare   |  none |
+| <a id="cmp-file2"></a>file2 |  The second file to compare   |  none |
+| <a id="cmp-args"></a>args |  Additional arguments to pass to cmp   |  `[]` |
 | <a id="cmp-out"></a>out |  The output file to write the output of cmp to. Defaults to ${name}.out.   |  `None` |
-| <a id="cmp-kwargs"></a>kwargs |  Additional arguments to pass to the underlying cmp_rule.   |  none |
+| <a id="cmp-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule.   |  none |
 
 

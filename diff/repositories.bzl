@@ -56,7 +56,7 @@ def diffutils_register_toolchains(name, diffutils_version, register = True, **kw
     """Convenience macro for users which does typical setup.
 
     - creates a repository for each built-in platform like "diff_linux_amd64"
-    - creates a repository exposing toolchains for each platform in "diff_toolchains"
+    - creates a repository exposing toolchains for each platform in "diffutils_toolchains"
     - registers a toolchain pointing at each platform
     Users can avoid this macro and do these steps themselves, if they want more control.
 

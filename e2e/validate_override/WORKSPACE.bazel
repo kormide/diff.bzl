@@ -1,7 +1,0 @@
-# Override http_archive for local testing
-local_repository(
-    name = "diff.bzl",
-    path = "../..",
-)
-
-diff.bzl_dependencies()
