@@ -33,7 +33,7 @@ effectively overriding the default named toolchain due to toolchain resolution p
 
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="diffutils.toolchain-name"></a>name |  Base name for generated repositories, allowing more than one diffutils toolchain to be registered. Overriding the default is only permitted in the root module.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | optional |  `"diffutils"`  |
+| <a id="diffutils.toolchain-name"></a>name |  Base name for generated repositories, allowing more than one diffutils toolchain to be registered. Overriding the default is only permitted in the root module.<br><br>A host toolchain repo is set up using {name} so that hermetically fetched diffutils binaries can be run with bazel run, e.g.,<br><br><pre><code class="language-bash">bazel run @diffutils//:diff $FILE1 $FILE2</code></pre>   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | optional |  `"diffutils"`  |
 | <a id="diffutils.toolchain-diffutils_version"></a>diffutils_version |  Explicit version of GNU prebuilt diffutils binaries.   | String | optional |  `"3.12"`  |
 
 

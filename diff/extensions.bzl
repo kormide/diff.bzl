@@ -10,6 +10,13 @@ _diffutils_toolchain = tag_class(attrs = {
     "name": attr.string(doc = """\
 Base name for generated repositories, allowing more than one diffutils toolchain to be registered.
 Overriding the default is only permitted in the root module.
+
+A host toolchain repo is set up using {name} so that hermetically fetched diffutils binaries
+can be run with bazel run, e.g.,
+
+```bash
+bazel run @diffutils//:diff $FILE1 $FILE2
+```
 """, default = _DEFAULT_NAME),
     "diffutils_version": attr.string(doc = "Explicit version of GNU prebuilt diffutils binaries.", default = DEFAULT_DIFFUTILS_VERSION),
 })
