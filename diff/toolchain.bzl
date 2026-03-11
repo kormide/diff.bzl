@@ -1,8 +1,7 @@
-"""This module implements the language-specific toolchain rule.
-"""
+"""Implement the language-specific toolchain rule."""
 
 DiffutilsInfo = provider(
-    doc = "Information about how to invoke the tool executable.",
+    doc = "Information about how to invoke the tool executable",
     fields = {
         "cmp_bin": "diffutils cmp binary",
         "diff_bin": "diffutils diff binary",

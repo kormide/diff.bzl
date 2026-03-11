@@ -8,12 +8,12 @@ def cmp(name, file1, file2, args = [], out = None, **kwargs):
     """Runs cmp (binary diff) between two files and returns the output.
 
     Args:
-        name: The name of the rule.
-        file1: The first file to cmp.
-        file2: The second file to cmp.
-        args: Additional arguments to pass to cmp.
+        name: The name of the rule
+        file1: The first file to compare
+        file2: The second file to compare
+        args: Additional arguments to pass to cmp
         out: The output file to write the output of cmp to. Defaults to ${name}.out.
-        **kwargs: Additional arguments to pass to the underlying cmp_rule.
+        **kwargs: Additional arguments to pass to the underlying rule.
     """
     if file1 and partial.is_instance(file1):
         file1_target = name + ".file1"
@@ -35,15 +35,15 @@ def cmp(name, file1, file2, args = [], out = None, **kwargs):
     )
 
 def diff(name, file1, file2, args = ["--unified"], patch = None, **kwargs):
-    """Runs a diff between two files and returns a patch.
+    """Runs a diff between two files and return a patch.
 
     Args:
-        name: The name of the rule.
-        file1: The first file to diff.
-        file2: The second file to diff.
-        args: Additional arguments to pass to diff.
+        name: The name of the rule
+        file1: The first file to compare
+        file2: The second file to compare
+        args: Additional arguments to pass to diff
         patch: The output file to write the diff to. Defaults to ${name}.patch.
-        **kwargs: Additional arguments to pass to the underlying diff_rule.
+        **kwargs: Additional arguments to pass to the underlying rule
     """
     if file1 and partial.is_instance(file1):
         file1_target = name + ".file1"
