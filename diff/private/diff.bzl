@@ -105,13 +105,13 @@ fi
             patch_cmd = _patch_cmd(type, ctx.file.file1.path, ctx.outputs.patch.path)
             if patch_cmd != None:
                 patch_msg = """
-                To accept the diff, run:
-                {}
+    To accept the diff, run:
+    {}
                 """.format(patch_cmd)
 
         validation_outputs.append(_validate(ctx, """\
-        ERROR: diff command exited with non-zero status.
-        {}""".format(patch_msg)))
+    ERROR: diff command exited with non-zero status.
+    {}""".format(patch_msg)))
 
     return [
         DefaultInfo(files = depset(outputs)),
