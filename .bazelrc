@@ -1,6 +1,9 @@
 import %workspace%/tools/preset.bazelrc
 
+# Don't build protoc from source
+common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
+
 # Don’t want to push a rules author to update their deps if not needed.
-# https://bazel.build/reference/command-line-reference#flag--check_direct_dependencies
+# https://bazel.build/reference/command-line-reference#common_options-flag--check_direct_dependencies
 # https://bazelbuild.slack.com/archives/C014RARENH0/p1691158021917459?thread_ts=1691156601.420349&cid=C014RARENH0
 common --config=ruleset
