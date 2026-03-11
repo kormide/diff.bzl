@@ -33,19 +33,4 @@ cat << EOF
 bazel_dep(name = "diff.bzl", version = "${TAG:1}")
 \`\`\`
 
-## Using WORKSPACE
-
-Paste this snippet into your \`WORKSPACE.bazel\` file:
-
-\`\`\`starlark
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-http_archive(
-    name = "diff.bzl",
-    sha256 = "${SHA}",
-    strip_prefix = "${PREFIX}",
-    url = "https://github.com/kormide/diff.bzl/releases/download/${TAG}/${ARCHIVE}",
-)
-EOF
-
-awk 'f;/--SNIP--/{f=1}' e2e/smoke/WORKSPACE.bazel
 echo "\`\`\`"
