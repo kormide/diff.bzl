@@ -11,35 +11,39 @@ diff(
     name = "patch",
     # Shorthand to write a generated file with some content we can run through diff.
     # Typically your content would come from a source file, or the output of some other rule.
-    file1 = partial.make(
-        write_file,
-        content = [
-            "hello",
-            "",
-        ],
-    ),
-    file2 = partial.make(
-        write_file,
-        content = [
-            "goodbye",
-            "",
-        ],
-    ),
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "hello",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "goodbye",
+                "",
+            ],
+        ),
+    ],
 )
 
 diff(
     name = "validate",
-    file1 = ":patch",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "1c1",
-            "< hello",
-            "---",
-            "> goodbye",
-            "",
-        ],
-    ),
+    srcs = [
+        ":patch",
+        partial.make(
+            write_file,
+            content = [
+                "1c1",
+                "< hello",
+                "---",
+                "> goodbye",
+                "",
+            ],
+        ),
+    ],
 )
 
 build_test(

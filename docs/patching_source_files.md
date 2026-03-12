@@ -7,8 +7,10 @@ load("@diff.bzl//diff:defs.bzl", "diff")
 
 diff(
     name = "foo",
-    file1 = "foo.pb.go",
-    file2 = ":foo_generated",
+    srcs = [
+      "foo.pb.go",
+      ":foo_generated",
+    ],
     validate = 1
 )
 ```
