@@ -34,14 +34,14 @@ def _determine_patch_type(args):
 
     return "normal"
 
-def _patch_cmd(type, source_file, patch_file):
+def _patch_cmd(type, _source_files, patch_file):
     if type == "normal":
-        return "(cd \\$(bazel info workspace); patch -p0 {} < {})".format(source_file, patch_file)
+        return ""  # "(cd \\$(bazel info workspace); patch -p0 {} < {})".format(source_files, patch_file)
     elif type == "context" or type == "unified":
-        return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
+        return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file.path)
     return None
 
-def _add_deterministic_label_args(args, file1, file2):
+def _add_deterministic_label_args(args, from_file, to_file):
     for arg in args:
         arg = arg.lstrip(" ")
         if arg.startswith("--label"):
@@ -49,46 +49,67 @@ def _add_deterministic_label_args(args, file1, file2):
             return args
 
     args = args[:]
-    args.extend(["--label", file1.short_path, "--label", file2.short_path])
+    args.extend(["--label", from_file.short_path, "--label", to_file.short_path])
     return args
 
 def _diff_rule_impl(ctx):
     DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
-
     type = _determine_patch_type(ctx.attr.args)
-    args = _add_deterministic_label_args(
-        ctx.attr.args,
-        ctx.file.file1,
-        ctx.file.file2,
-    ) if type == "context" or type == "unified" else ctx.attr.args
-
-    command = """\
-{} {} {} {} > {}
-if [[ $? == '2' ]]; then
-    exit 2
-fi
-""".format(
-        DIFF_BIN.path,
-        " ".join(args),
-        ctx.file.file1.path,
-        ctx.file.file2.path,
-        ctx.outputs.patch.path,
-    )
 
     outputs = [ctx.outputs.patch]
+    patches = []
+
+    for i in range(len(ctx.files.from_file)):
+        args = _add_deterministic_label_args(
+            ctx.attr.args,
+            ctx.files.from_file[i],
+            ctx.files.to_file[i],
+        ) if type == "context" or type == "unified" else ctx.attr.args
+
+        patch = ctx.actions.declare_file(ctx.outputs.patch.path + ".%d" % i)
+        patches.append(patch)
+
+        command = """\
+    {} {} {} {} > {}
+    if [[ $? == '2' ]]; then
+        exit 2
+    fi
+    """.format(
+            DIFF_BIN.path,
+            " ".join(args),
+            ctx.files.from_file[i].path,
+            ctx.files.to_file[i].path,
+            patch.path,
+        )
+
+        ctx.actions.run_shell(
+            inputs = [ctx.files.from_file[i], ctx.files.to_file[i]],
+            outputs = [patch],
+            command = command,
+            mnemonic = "DiffutilsDiff",
+            progress_message = "Diffing %{input} to %{output}",
+            tools = [DIFF_BIN],
+            toolchain = DIFFUTILS_TOOLCHAIN_TYPE,
+        )
 
     ctx.actions.run_shell(
-        inputs = [ctx.file.file1, ctx.file.file2],
-        outputs = outputs,
-        command = command,
-        mnemonic = "DiffutilsDiff",
-        progress_message = "Diffing %{input} to %{output}",
-        tools = [DIFF_BIN],
-        toolchain = DIFFUTILS_TOOLCHAIN_TYPE,
+        inputs = patches,
+        outputs = [ctx.outputs.patch],
+        command = """\
+cat {} > {}
+""".format(" ".join([p.path for p in patches]), ctx.outputs.patch.path),
+        mnemonic = "CombinePatches",
+        progress_message = "Combining ... TODO",
     )
 
     validation_outputs = []
-    source_patch_outputs = [ctx.outputs.patch] if ctx.file.file1.is_source else []
+    all_source_from_files = True
+    for file in ctx.files.from_file:
+        if not file.is_source:
+            all_source_from_files = False
+            break
+
+    source_patch_outputs = [ctx.outputs.patch] if all_source_from_files else []
 
     if ctx.attr.validate == 1:
         validate = True
@@ -99,10 +120,10 @@ fi
 
     if validate:
         patch_msg = ""
-        if ctx.file.file1.is_source:
-            # Show a command to patch file1 if it's a source file.
+        if all_source_from_files:
+            # Show a command to patch from_file if it's a source file.
             # NB: the error message we print here allows the user to be in any working directory.
-            patch_cmd = _patch_cmd(type, ctx.file.file1.path, ctx.outputs.patch.path)
+            patch_cmd = _patch_cmd(type, ctx.files.from_file, ctx.outputs.patch)
             if patch_cmd != None:
                 patch_msg = """
     To accept the diff, run:
@@ -131,8 +152,8 @@ diff_rule = rule(
             """,
             default = [],
         ),
-        "file1": attr.label(allow_single_file = True),
-        "file2": attr.label(allow_single_file = True),
+        "from_file": attr.label_list(allow_files = True),
+        "to_file": attr.label_list(allow_files = True),
         "patch": attr.output(
             doc = """\
               The standard output of the diff command is written to this file.
