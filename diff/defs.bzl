@@ -55,11 +55,17 @@ def diff(name, file1, file2, args = ["--unified"], patch = None, **kwargs):
         partial.call(file2, name = file2_target, out = file2_target + ".in")
         file2 = file2_target
 
+    if type(file1) != "list":
+        file1 = [file1]
+
+    if type(file2) != "list":
+        file2 = [file2]
+
     diff_rule(
         name = name,
         args = args,
-        file1 = file1,
-        file2 = file2,
+        from_file = file1,
+        to_file = file2,
         patch = patch or name + ".patch",
         **kwargs
     )

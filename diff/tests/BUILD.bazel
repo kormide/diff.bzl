@@ -57,6 +57,26 @@ diff(
 )
 
 diff(
+    name = "case_unified_mulitfile",
+    args = ["--unified"],
+    file1 = [
+        "case_unified_multifile_patch.a1",
+        "case_unified_multifile_patch.a2",
+    ],
+    file2 = [
+        "case_unified_multifile_patch.b1",
+        "case_unified_multifile_patch.b2",
+    ],
+)
+
+diff(
+    name = "case_unified_mulitfile_assert_patch",
+    file1 = "case_unified_multifile.golden.patch",
+    file2 = ":case_unified_mulitfile",
+    validate = 1,
+)
+
+diff(
     name = "case_context",
     args = ["--context"],
     file1 = partial.make(

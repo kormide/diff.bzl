@@ -1,0 +1,10 @@
+--- diff/tests/case_unified_multifile_patch.a1
++++ diff/tests/case_unified_multifile_patch.b1
+@@ -1 +1 @@
+-a1
++b1
+--- diff/tests/case_unified_multifile_patch.a2
++++ diff/tests/case_unified_multifile_patch.b2
+@@ -1 +1 @@
+-a2
++b2
