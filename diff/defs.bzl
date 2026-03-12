@@ -1,7 +1,12 @@
 "Public API re-exports"
 
 load("@bazel_skylib//lib:partial.bzl", "partial")
-load("//diff/private:diff.bzl", "diff_rule")
+load("//diff/private:diff.bzl", "diff_rule", _FilesToDiffInfo = "FilesToDiffInfo", _diff_multiple = "diff_multiple")
+
+# Re-export the FilesToDiffInfo provider
+FilesToDiffInfo = _FilesToDiffInfo
+
+diff_multiple = _diff_multiple
 
 def diff(name, file1, file2, patch = None, exit_code = None, **kwargs):
     """Runs a diff between two files and returns the exit code.
