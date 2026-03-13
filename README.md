@@ -25,8 +25,7 @@ load("@diff.bzl//diff:defs.bzl", "diff")
 diff(
     name = "patch"
     args = ["--unified"],
-    file1 = "a.txt",
-    file2 = "b.txt",
+    srcs = ["a.txt", "b.txt"],
     patch = "a.patch"
 )
 ```

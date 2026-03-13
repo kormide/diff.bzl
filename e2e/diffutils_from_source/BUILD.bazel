@@ -9,20 +9,22 @@ load("@diff.bzl", "diff")
 
 diff(
     name = "diff",
-    file1 = partial.make(
-        write_file,
-        content = [
-            "hello",
-            "",
-        ],
-    ),
-    file2 = partial.make(
-        write_file,
-        content = [
-            "goodbye",
-            "",
-        ],
-    ),
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "hello",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "goodbye",
+                "",
+            ],
+        ),
+    ],
     patch = "diff.patch",
 )
 

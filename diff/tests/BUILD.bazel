@@ -6,112 +6,130 @@ load("//diff:defs.bzl", "cmp", "diff")
 
 diff(
     name = "case_normal",
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "moo",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "cow",
+                "",
+            ],
+        ),
+    ],
     args = ["--normal"],
-    file1 = partial.make(
-        write_file,
-        content = [
-            "moo",
-            "",
-        ],
-    ),
-    file2 = partial.make(
-        write_file,
-        content = [
-            "cow",
-            "",
-        ],
-    ),
 )
 
 diff(
     name = "case_normal_assert_patch",
-    file1 = "case_normal.golden.patch",
-    file2 = ":case_normal",
+    srcs = [
+        "case_normal.golden.patch",
+        ":case_normal",
+    ],
     validate = 1,
 )
 
 diff(
     name = "case_unified",
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "moo",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "cow",
+                "",
+            ],
+        ),
+    ],
     args = ["--unified"],
-    file1 = partial.make(
-        write_file,
-        content = [
-            "moo",
-            "",
-        ],
-    ),
-    file2 = partial.make(
-        write_file,
-        content = [
-            "cow",
-            "",
-        ],
-    ),
 )
 
 diff(
     name = "case_unified_assert_patch",
-    file1 = "case_unified.golden.patch",
-    file2 = ":case_unified",
+    srcs = [
+        "case_unified.golden.patch",
+        ":case_unified",
+    ],
     validate = 1,
 )
 
 diff(
     name = "case_context",
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "moo",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "cow",
+                "",
+            ],
+        ),
+    ],
     args = ["--context"],
-    file1 = partial.make(
-        write_file,
-        content = [
-            "moo",
-            "",
-        ],
-    ),
-    file2 = partial.make(
-        write_file,
-        content = [
-            "cow",
-            "",
-        ],
-    ),
 )
 
 diff(
     name = "case_context_assert_patch",
-    file1 = "case_context.golden.patch",
-    file2 = ":case_context",
+    srcs = [
+        "case_context.golden.patch",
+        ":case_context",
+    ],
     validate = 1,
 )
 
 diff(
     name = "case_recursive",
+    srcs = [
+        "case_recursive.dir_a",
+        "case_recursive.dir_b",
+    ],
     args = [
         "--recursive",
         "--new-file",
         "--unified",
     ],
-    file1 = "case_recursive.dir_a",
-    file2 = "case_recursive.dir_b",
 )
 
 diff(
     name = "case_recursive_assert_patch",
-    file1 = "case_recursive.golden.patch",
-    file2 = ":case_recursive",
+    srcs = [
+        "case_recursive.golden.patch",
+        ":case_recursive",
+    ],
     validate = 1,
 )
 
 diff(
     name = "case_recursive_empty_dirs",
+    srcs = [
+        partial.make(
+            copy_to_directory,  # Create an empty directory
+        ),
+        partial.make(
+            copy_to_directory,  # Create an empty directory
+        ),
+    ],
     args = [
         "--recursive",
         "--unified",
     ],
-    file1 = partial.make(
-        copy_to_directory,  # Create an empty directory
-    ),
-    file2 = partial.make(
-        copy_to_directory,  # Create an empty directory
-    ),
     validate = 1,
 )
 
@@ -133,54 +151,64 @@ genrule(
 
 cmp(
     name = "case_cmp_same_binary",
-    file1 = "case_cmp_same_binary.a",
-    file2 = "case_cmp_same_binary.b",
+    srcs = [
+        "case_cmp_same_binary.a",
+        "case_cmp_same_binary.b",
+    ],
     validate = 1,
 )
 
 cmp(
     name = "case_cmp_different_binary",
-    file1 = "case_cmp_different_binary.a",
-    file2 = "case_cmp_different_binary.b",
+    srcs = [
+        "case_cmp_different_binary.a",
+        "case_cmp_different_binary.b",
+    ],
 )
 
 diff(
     name = "case_cmp_different_binary_assert_output",
-    file1 = ":case_cmp_different_binary",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "diff/tests/case_cmp_different_binary.a diff/tests/case_cmp_different_binary.b differ: char 1, line 1",
-            "",
-        ],
-    ),
+    srcs = [
+        ":case_cmp_different_binary",
+        partial.make(
+            write_file,
+            content = [
+                "diff/tests/case_cmp_different_binary.a diff/tests/case_cmp_different_binary.b differ: char 1, line 1",
+                "",
+            ],
+        ),
+    ],
     validate = 1,
 )
 
 cmp(
     name = "case_cmp_verbose",
+    srcs = [
+        "case_cmp_verbose.a",
+        "case_cmp_verbose.b",
+    ],
     args = ["--verbose"],
-    file1 = "case_cmp_verbose.a",
-    file2 = "case_cmp_verbose.b",
 )
 
 diff(
     name = "case_cmp_verbose_assert_output",
-    file1 = ":case_cmp_verbose",
-    file2 = partial.make(
-        write_file,
-        content = [
-            "1 125  10",
-            "2 142  77",
-            "3  46 171",
-            "4  41 312",
-            "5  62 134",
-            "6 315 353",
-            "7 231 360",
-            "8 231 167",
-            "",
-        ],
-    ),
+    srcs = [
+        ":case_cmp_verbose",
+        partial.make(
+            write_file,
+            content = [
+                "1 125  10",
+                "2 142  77",
+                "3  46 171",
+                "4  41 312",
+                "5  62 134",
+                "6 315 353",
+                "7 231 360",
+                "8 231 167",
+                "",
+            ],
+        ),
+    ],
     validate = 1,
 )
 

@@ -5,27 +5,31 @@ load("@diff.bzl", "cmp", "diff")
 
 cmp(
     name = "cmp",
-    file1 = "a",
-    file2 = "b",
+    srcs = [
+        "a",
+        "b",
+    ],
     validate = 0,
 )
 
 diff(
     name = "diff",
-    file1 = partial.make(
-        write_file,
-        content = [
-            "hello",
-            "",
-        ],
-    ),
-    file2 = partial.make(
-        write_file,
-        content = [
-            "goodbye",
-            "",
-        ],
-    ),
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "hello",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "goodbye",
+                "",
+            ],
+        ),
+    ],
     validate = 0,
 )
 

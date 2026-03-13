@@ -15,9 +15,11 @@ stardoc(
 
 diff(
     name = "rules",
+    srcs = [
+        "rules.md",
+        ":rules_doc",
+    ],
     args = ["--unified"],
-    file1 = "rules.md",
-    file2 = ":rules_doc",
     validate = 1,
 )
 
@@ -31,8 +33,10 @@ stardoc(
 
 diff(
     name = "extensions",
+    srcs = [
+        "extensions.md",
+        ":extensions_doc",
+    ],
     args = ["--unified"],
-    file1 = "extensions.md",
-    file2 = ":extensions_doc",
     validate = 1,
 )

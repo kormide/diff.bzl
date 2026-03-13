@@ -23,6 +23,9 @@ def _validate(ctx, error_message):
 def _cmp_rule_impl(ctx):
     CMP_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.cmp_bin
 
+    if len(ctx.attr.srcs) != 2:
+        fail("error: srcs attr of cmp rule must contain exactly two targets")
+
     command = """\
 {} {} {} {} > {}
 if [[ $? == '2' ]]; then
@@ -31,15 +34,15 @@ fi
 """.format(
         CMP_BIN.path,
         " ".join(ctx.attr.args),
-        ctx.file.file1.path,
-        ctx.file.file2.path,
+        ctx.files.srcs[0].path,
+        ctx.files.srcs[1].path,
         ctx.outputs.out.path,
     )
 
     outputs = [ctx.outputs.out]
 
     ctx.actions.run_shell(
-        inputs = [ctx.file.file1, ctx.file.file2],
+        inputs = ctx.files.srcs,
         outputs = outputs,
         command = command,
         mnemonic = "DiffutilsCmp",
@@ -58,12 +61,12 @@ fi
         validate = ctx.attr._options[DiffOptionsInfo].validate
 
     if validate:
-        # Show a command to replace file1 if it's a source file.
+        # Show a command to replace the first file if it's a source file.
         # NB: the error message we print here allows the user to be in any working directory.
         msg = """
-        To replace file1, run:
+        To replace {file1}, run:
         (cd \\$(bazel info workspace); cp {file2} {file1})
-        """.format(file1 = ctx.file.file1.path, file2 = ctx.file.file2.path) if ctx.file.file1.is_source else ""
+        """.format(file1 = ctx.files.srcs[0].path, file2 = ctx.files.srcs[1].path) if ctx.files.srcs[0].is_source else ""
 
         validation_outputs.append(_validate(ctx, """\
         ERROR: cmp command exited with non-zero status.
@@ -85,8 +88,7 @@ cmp_rule = rule(
             """,
             default = [],
         ),
-        "file1": attr.label(allow_single_file = True),
-        "file2": attr.label(allow_single_file = True),
+        "srcs": attr.label_list(allow_files = True),
         "out": attr.output(
             doc = """\
               The output of cmp is written to this file.

@@ -55,11 +55,15 @@ def _add_deterministic_label_args(args, file1, file2):
 def _diff_rule_impl(ctx):
     DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
 
+    # TODO: allow more than two srcs when --from-file or --to-file are specified
+    if len(ctx.attr.srcs) != 2:
+        fail("error: srcs attr of diff rule must contain exactly two targets")
+
     type = _determine_patch_type(ctx.attr.args)
     args = _add_deterministic_label_args(
         ctx.attr.args,
-        ctx.file.file1,
-        ctx.file.file2,
+        ctx.files.srcs[0],
+        ctx.files.srcs[1],
     ) if type == "context" or type == "unified" else ctx.attr.args
 
     command = """\
@@ -70,15 +74,15 @@ fi
 """.format(
         DIFF_BIN.path,
         " ".join(args),
-        ctx.file.file1.path,
-        ctx.file.file2.path,
+        ctx.files.srcs[0].path,
+        ctx.files.srcs[1].path,
         ctx.outputs.patch.path,
     )
 
     outputs = [ctx.outputs.patch]
 
     ctx.actions.run_shell(
-        inputs = [ctx.file.file1, ctx.file.file2],
+        inputs = ctx.files.srcs,
         outputs = outputs,
         command = command,
         mnemonic = "DiffutilsDiff",
@@ -88,7 +92,7 @@ fi
     )
 
     validation_outputs = []
-    source_patch_outputs = [ctx.outputs.patch] if ctx.file.file1.is_source else []
+    source_patch_outputs = [ctx.outputs.patch] if ctx.files.srcs[0].is_source else []
 
     if ctx.attr.validate == 1:
         validate = True
@@ -99,10 +103,10 @@ fi
 
     if validate:
         patch_msg = ""
-        if ctx.file.file1.is_source:
-            # Show a command to patch file1 if it's a source file.
+        if ctx.files.srcs[0].is_source:
+            # Show a command to patch the source file if it's a (bazel) source file.
             # NB: the error message we print here allows the user to be in any working directory.
-            patch_cmd = _patch_cmd(type, ctx.file.file1.path, ctx.outputs.patch.path)
+            patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path)
             if patch_cmd != None:
                 patch_msg = """
     To accept the diff, run:
@@ -131,8 +135,7 @@ diff_rule = rule(
             """,
             default = [],
         ),
-        "file1": attr.label(allow_single_file = True),
-        "file2": attr.label(allow_single_file = True),
+        "srcs": attr.label_list(allow_files = True),
         "patch": attr.output(
             doc = """\
               The standard output of the diff command is written to this file.
