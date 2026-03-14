@@ -1,5 +1,5 @@
-*** diff/tests/case_context.0.in
---- diff/tests/case_context.1.in
+*** diff/tests/case_context.0.in 0000-00-00 00:00:00.000000000 +0000
+--- diff/tests/case_context.1.in 0000-00-00 00:00:00.000000000 +0000
 ***************
 *** 1 ****
 ! moo

@@ -36,7 +36,34 @@ load("@diff.bzl//diff:defs.bzl", "diff")
 diff(<a href="#diff-name">name</a>, <a href="#diff-srcs">srcs</a>, <a href="#diff-args">args</a>, <a href="#diff-patch">patch</a>, <a href="#diff-kwargs">**kwargs</a>)
 </pre>
 
-Runs a diff between two files and return a patch.
+Runs a diff between files and return a patch.
+
+Examples:
+
+Create a patch between two files.
+
+```starlark
+diff(
+    name = "patch"
+    srcs = ["a.txt", "b.txt"],
+    patch = "a.patch"
+)
+```
+
+Use `--from-file` to create a patch from one file to several files.
+
+```starlark
+diff(
+    name = "patch"
+    args = ["--unified", "--from-file", "$(execpath a.txt)"],
+    srcs = ["a.txt", "b.txt", "c.txt"],
+    patch = "a.patch"
+)
+```
+
+_By default, diff creates a unified format patch by passing `["--unified"]`
+to `args`. If overriding arguments, --unified must be added explicitly._
+
 
 **PARAMETERS**
 
