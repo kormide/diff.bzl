@@ -1,5 +1,6 @@
 """Implements the diff rule."""
 
+load("@bazel_lib//lib:expand_make_vars.bzl", "expand_locations")
 load("//diff/private:options.bzl", "DiffOptionsInfo")
 
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
@@ -41,48 +42,118 @@ def _patch_cmd(type, source_file, patch_file):
         return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
     return None
 
-def _add_deterministic_label_args(args, file1, file2):
-    for arg in args:
+def _detect_multifile(args):
+    from_file = False
+    to_file = False
+    file_path = None
+
+    for i, arg in enumerate(args):
         arg = arg.lstrip(" ")
-        if arg.startswith("--label"):
-            # labels already set, don't interfere
-            return args
+        if arg.startswith("--from-file"):
+            from_file = True
+            file_path = args[i + 1]
+            break
+        elif arg.startswith("--to-file"):
+            to_file = True
+            file_path = args[i + 1]
+            break
 
-    args = args[:]
-    args.extend(["--label", file1.short_path, "--label", file2.short_path])
-    return args
+    return (from_file, to_file, file_path)
 
-def _diff_rule_impl(ctx):
-    DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
-
-    # TODO: allow more than two srcs when --from-file or --to-file are specified
-    if len(ctx.attr.srcs) != 2:
-        fail("error: srcs attr of diff rule must contain exactly two targets")
-
-    type = _determine_patch_type(ctx.attr.args)
-    args = _add_deterministic_label_args(
-        ctx.attr.args,
-        ctx.files.srcs[0],
-        ctx.files.srcs[1],
-    ) if type == "context" or type == "unified" else ctx.attr.args
-
-    command = """\
-{} {} {} {} > {}
+def _build_command(bin_dir, diff_bin, args, files, patch, type):
+    if type == "unified":
+        command = """
+DIFF=$({} {} {})
+if [[ $? == '2' ]]; then
+    exit 2
+fi
+echo "$DIFF" | sed -r 's#^((---|\\+\\+\\+)\\s+)({}/)?(\\S+)\\s+\\S+\\s+\\S*(.*)$#\\1\\4 0000-00-00 00:00:00.000000000\\5#' > {}
+""".format(
+            diff_bin,
+            " ".join(args),
+            " ".join([file.path for file in files]),
+            bin_dir,
+            patch.path,
+        )
+    elif type == "context":
+        command = """
+DIFF=$({} {} {})
+if [[ $? == '2' ]]; then
+    exit 2
+fi
+echo "$DIFF" | sed -r 's#^((---|\\*\\*\\*)\\s+)({}/)?(\\S+)\\s+\\S+\\s+\\S*(.*)$#\\1\\4 0000-00-00 00:00:00.000000000\\5#' > {}
+""".format(
+            diff_bin,
+            " ".join(args),
+            " ".join([file.path for file in files]),
+            bin_dir,
+            patch.path,
+        )
+    else:
+        command = """
+{} {} {} > {}
 if [[ $? == '2' ]]; then
     exit 2
 fi
 """.format(
+            diff_bin,
+            " ".join(args),
+            " ".join([file.path for file in files]),
+            patch.path,
+        )
+    return command
+
+def _is_patchable(type, files, from_file, to_file, for_or_to_file_path):
+    filtered_files = [file for file in files if file.path != for_or_to_file_path]
+    if from_file:
+        # doesn't make sense for source patching
+        return False
+    elif to_file:
+        # cannot apply a multifile normal patch since there are no file labels
+        if type == "normal":
+            return False
+
+        # every other file must be a source file
+        for file in filtered_files:
+            if not file.is_source:
+                return False
+        return True
+    else:
+        return files[0].is_source
+
+def _diff_rule_impl(ctx):
+    DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
+
+    args = ctx.attr.args[:]
+    for i in range(len(args)):
+        args[i] = expand_locations(ctx, args[i], ctx.attr.srcs)
+
+    (from_file, to_file, from_or_to_file_path) = _detect_multifile(args)
+
+    if not from_file and not to_file and len(ctx.attr.srcs) != 2:
+        fail("error: srcs attr of diff rule must contain exactly two targets unless --from-file or --to-file are specified")
+
+    type = _determine_patch_type(args)
+
+    command = _build_command(
+        ctx.bin_dir.path,
         DIFF_BIN.path,
-        " ".join(args),
-        ctx.files.srcs[0].path,
-        ctx.files.srcs[1].path,
-        ctx.outputs.patch.path,
+        args,
+        ctx.files.srcs,
+        ctx.outputs.patch,
+        type,
     )
 
     outputs = [ctx.outputs.patch]
 
     ctx.actions.run_shell(
         inputs = ctx.files.srcs,
+        env = {
+            # --context diffs use locale time format
+            # --unified always uses ISO
+            # Always use the same date format to make parsing and zeroing them easier
+            "LC_TIME": "en_DK.UTF-8",
+        },
         outputs = outputs,
         command = command,
         mnemonic = "DiffutilsDiff",
@@ -92,7 +163,8 @@ fi
     )
 
     validation_outputs = []
-    source_patch_outputs = [ctx.outputs.patch] if ctx.files.srcs[0].is_source else []
+    patchable = _is_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path)
+    source_patch_outputs = [ctx.outputs.patch] if patchable else []
 
     if ctx.attr.validate == 1:
         validate = True
@@ -103,7 +175,7 @@ fi
 
     if validate:
         patch_msg = ""
-        if ctx.files.srcs[0].is_source:
+        if patchable:
             # Show a command to patch the source file if it's a (bazel) source file.
             # NB: the error message we print here allows the user to be in any working directory.
             patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path)

@@ -133,6 +133,52 @@ diff(
     validate = 1,
 )
 
+diff(
+    name = "case_from_file",
+    srcs = [
+        "case_from_file.a",
+        "case_from_file.b",
+        "case_from_file.c",
+    ],
+    args = [
+        "--unified",
+        "--from-file",
+        "$(execpath case_from_file.a)",
+    ],
+)
+
+diff(
+    name = "case_from_file_assert_patch",
+    srcs = [
+        "case_from_file.golden.patch",
+        ":case_from_file",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_to_file",
+    srcs = [
+        "case_to_file.a",
+        "case_to_file.b",
+        "case_to_file.c",
+    ],
+    args = [
+        "--unified",
+        "--to-file",
+        "$(execpath case_to_file.a)",
+    ],
+)
+
+diff(
+    name = "case_to_file_assert_patch",
+    srcs = [
+        "case_to_file.golden.patch",
+        ":case_to_file",
+    ],
+    validate = 1,
+)
+
 genrule(
     name = "case_diff_genrule",
     srcs = [],
@@ -224,6 +270,10 @@ build_test(
         ":case_recursive",
         ":case_recursive_assert_patch",
         ":case_recursive_empty_dirs",
+        ":case_from_file",
+        ":case_from_file_assert_patch",
+        ":case_to_file",
+        ":case_to_file_assert_patch",
         ":case_diff_genrule",
         ":case_cmp_genrule",
         ":case_cmp_same_binary",
