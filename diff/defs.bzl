@@ -29,7 +29,33 @@ def cmp(name, srcs, args = [], out = None, **kwargs):
     )
 
 def diff(name, srcs, args = ["--unified"], patch = None, **kwargs):
-    """Runs a diff between two files and return a patch.
+    """Runs a diff between files and return a patch.
+
+    Examples:
+
+    Create a patch between two files.
+
+    ```starlark
+    diff(
+        name = "patch"
+        srcs = ["a.txt", "b.txt"],
+        patch = "a.patch"
+    )
+    ```
+
+    Use `--from-file` to create a patch from one file to several files.
+
+    ```starlark
+    diff(
+        name = "patch"
+        args = ["--unified", "--from-file", "$(execpath a.txt)"],
+        srcs = ["a.txt", "b.txt", "c.txt"],
+        patch = "a.patch"
+    )
+    ```
+
+    _By default, diff creates a unified format patch by passing `["--unified"]`
+    to `args`. If overriding arguments, --unified must be added explicitly._
 
     Args:
         name: The name of the rule

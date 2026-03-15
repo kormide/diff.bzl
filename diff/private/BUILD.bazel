@@ -16,6 +16,9 @@ bzl_library(
         "options.bzl",
     ],
     visibility = ["//diff:__subpackages__"],
+    deps = [
+        "@bazel_lib//lib:expand_make_vars",
+    ],
 )
 
 bzl_library(
