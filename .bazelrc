@@ -9,3 +9,5 @@ common --incompatible_enable_proto_toolchain_resolution
 # https://bazel.build/reference/command-line-reference#common_options-flag--check_direct_dependencies
 # https://bazelbuild.slack.com/archives/C014RARENH0/p1691158021917459?thread_ts=1691156601.420349&cid=C014RARENH0
 common --config=ruleset
+
+common:ci --keep_going

@@ -13,11 +13,12 @@ def _validate(ctx, error_message):
         # assert that the diff output is empty
         command = """
         touch {}
+        cat {}
         if [ "$(head -c 1 {})" != "" ]; then
             >&2 echo "{}"
             exit 1
         fi
-        """.format(diff_valid_file.path, ctx.outputs.patch.path, error_message),
+        """.format(diff_valid_file.path, ctx.outputs.patch.path, ctx.outputs.patch.path, error_message),
     )
     return diff_valid_file
 
@@ -81,7 +82,7 @@ DIFF=$({} {} {})
 if [[ $? == '2' ]]; then
     exit 2
 fi
-echo "$DIFF" | sed -r 's#^((---|\\*\\*\\*)\\s+)({}/)?(\\S+)\\s+\\S+\\s+\\S*(.*)$#\\1\\4 0000-00-00 00:00:00.000000000\\5#' > {}
+echo "$DIFF" | sed -r 's#^((---|\\*\\*\\*)\\s+)({}/)?(\\S+)\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S*(.*)$#\\1\\4 0000-00-00 00:00:00.000000000\\5#' > {}
 """.format(
             diff_bin,
             " ".join(args),
@@ -150,9 +151,9 @@ def _diff_rule_impl(ctx):
         inputs = ctx.files.srcs,
         env = {
             # --context diffs use locale time format
-            # --unified always uses ISO
-            # Always use the same date format to make parsing and zeroing them easier
-            "LC_TIME": "en_DK.UTF-8",
+            # Use a locale available on most machines so that we can parse
+            # a well-defined format and zero the time.
+            "LC_TIME": "C",
         },
         outputs = outputs,
         command = command,
