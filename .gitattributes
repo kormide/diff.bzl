@@ -9,3 +9,7 @@ examples export-ignore
 # Occasionally there's a need to "stamp" the release version into a file
 # See https://blog.aspect.build/releasing-bazel-rulesets-rust for details if you need this.
 # diff/version.bzl export-subst
+
+# Collapse generates file changes in pull requests
+docs/extensions.md linguist-generated
+docs/rules.md linguist-generated

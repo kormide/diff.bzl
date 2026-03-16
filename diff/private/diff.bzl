@@ -60,53 +60,47 @@ def _detect_multifile(args):
 
     return (from_file, to_file, file_path)
 
-def _build_command(bin_dir, diff_bin, args, files, patch, type):
-    zero_timestamp_and_offset = "0000-00-00 00:00:00.000000000 +0000"
+def _build_command(bin_dir, diff_bin, patch, type):
+    epoch_timestamp = "1970-01-01 00:00:00.000000000 +0000"
     if type == "unified":
         match_timestamp_and_offset = "[0-9]{4}-[0-9]{2}-[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]+\\s+[-+][0-9]{4}"
         command = """
-DIFF=$({} {} {})
+DIFF=$({} $@)
 if [[ $? == '2' ]]; then
     exit 2
 fi
 echo "$DIFF" | sed -r 's#^((---|\\+\\+\\+)\\s+)({}/)?(\\S+)\\s+{}#\\1\\4 {}#' > {}
 """.format(
             diff_bin,
-            " ".join(args),
-            " ".join([file.path for file in files]),
             bin_dir,
             match_timestamp_and_offset,
-            zero_timestamp_and_offset,
+            epoch_timestamp,
             patch.path,
         )
     elif type == "context":
         # assumes LC_TIME=C
         match_timestamp = "\\S+\\s+\\S+\\s+[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\\s+[0-9]{4}"
         command = """
-DIFF=$({} {} {})
+DIFF=$({} $@)
 if [[ $? == '2' ]]; then
     exit 2
 fi
 echo "$DIFF" | sed -r 's#^((---|\\*\\*\\*)\\s+)({}/)?(\\S+)\\s+{}#\\1\\4 {}#' > {}
 """.format(
             diff_bin,
-            " ".join(args),
-            " ".join([file.path for file in files]),
             bin_dir,
             match_timestamp,
-            zero_timestamp_and_offset,
+            epoch_timestamp,
             patch.path,
         )
     else:
         command = """
-{} {} {} > {}
+{} $@ > {}
 if [[ $? == '2' ]]; then
     exit 2
 fi
 """.format(
             diff_bin,
-            " ".join(args),
-            " ".join([file.path for file in files]),
             patch.path,
         )
     return command
@@ -132,22 +126,21 @@ def _is_patchable(type, files, from_file, to_file, for_or_to_file_path):
 def _diff_rule_impl(ctx):
     DIFF_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.diff_bin
 
-    args = ctx.attr.args[:]
-    for i in range(len(args)):
-        args[i] = expand_locations(ctx, args[i], ctx.attr.srcs)
+    args = ctx.actions.args()
+    for arg in ctx.attr.args:
+        args.add(expand_locations(ctx, arg, ctx.attr.srcs))
+    args.add_all(ctx.files.srcs, expand_directories = False)
 
-    (from_file, to_file, from_or_to_file_path) = _detect_multifile(args)
+    (from_file, to_file, from_or_to_file_path) = _detect_multifile(ctx.attr.args)
 
     if not from_file and not to_file and len(ctx.attr.srcs) != 2:
         fail("error: srcs attr of diff rule must contain exactly two targets unless --from-file or --to-file are specified")
 
-    type = _determine_patch_type(args)
+    type = _determine_patch_type(ctx.attr.args)
 
     command = _build_command(
         ctx.bin_dir.path,
         DIFF_BIN.path,
-        args,
-        ctx.files.srcs,
         ctx.outputs.patch,
         type,
     )
@@ -156,12 +149,13 @@ def _diff_rule_impl(ctx):
 
     ctx.actions.run_shell(
         inputs = ctx.files.srcs,
+        arguments = [args],
         env = {
             # --unified always uses the same timestamp format:
             # https://www.gnu.org/software/diffutils/manual/html_node/Detailed-Unified.html#Detailed-Description-of-Unified-Format
             # --context diffs use locale time format
             # Override the --context time format to be predictable for parsing using a locale
-            # available on all machine.
+            # available on all machines.
             "LC_TIME": "C",
         },
         outputs = outputs,
