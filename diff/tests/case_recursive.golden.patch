@@ -1,11 +1,11 @@
-diff --recursive --new-file --unified --label diff/tests/case_recursive.dir_a --label diff/tests/case_recursive.dir_b diff/tests/case_recursive.dir_a diff/tests/case_recursive.dir_b
---- diff/tests/case_recursive.dir_a
-+++ diff/tests/case_recursive.dir_b
+diff --recursive --new-file --unified diff/tests/case_recursive.dir_a/cow.txt diff/tests/case_recursive.dir_b/cow.txt
+--- diff/tests/case_recursive.dir_a/cow.txt 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_recursive.dir_b/cow.txt 1970-01-01 00:00:00.000000000 +0000
 @@ -0,0 +1 @@
 +moo, moooooo!
-diff --recursive --new-file --unified --label diff/tests/case_recursive.dir_a --label diff/tests/case_recursive.dir_b diff/tests/case_recursive.dir_a diff/tests/case_recursive.dir_b
---- diff/tests/case_recursive.dir_a
-+++ diff/tests/case_recursive.dir_b
+diff --recursive --new-file --unified diff/tests/case_recursive.dir_a/file.txt diff/tests/case_recursive.dir_b/file.txt
+--- diff/tests/case_recursive.dir_a/file.txt 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_recursive.dir_b/file.txt 1970-01-01 00:00:00.000000000 +0000
 @@ -1 +1,2 @@
  hello
 +goodbye
