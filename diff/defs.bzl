@@ -70,10 +70,20 @@ def diff(name, srcs, args = ["--unified"], patch = None, **kwargs):
             partial.call(srcs[i], name = target, out = target + ".in")
             srcs[i] = target
 
+    # Determine whether patchable inputs are all source directories.
+    # Bazel rules cannot detect source directories. This information is
+    # needed to produce the correct patch command.
+    source_directories = False
+    if len(srcs) == 2:  # TODO: support multiple directory inputs with --to-file
+        all_sources = set(native.glob([srcs[0]], exclude_directories = 0, allow_empty = True))
+        file_sources = set(native.glob([srcs[0]], exclude_directories = 1, allow_empty = True))
+        source_directories = len(all_sources.difference(file_sources)) > 0
+
     diff_rule(
         name = name,
         args = args,
         srcs = srcs,
         patch = patch or name + ".patch",
+        source_directories = source_directories,
         **kwargs
     )
