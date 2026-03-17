@@ -35,11 +35,21 @@ def _determine_patch_type(args):
 
     return "normal"
 
-def _patch_cmd(type, source_file, patch_file):
+def _is_recursive(args):
+    for arg in args:
+        arg = arg.lstrip(" ")
+        if arg.startswith("-r") or arg.startswith("--recursive"):
+            return True
+    return False
+
+def _patch_cmd(type, source_file, patch_file, recursive, source_directories):
     if type == "normal":
         return "(cd \\$(bazel info workspace); patch -p0 {} < {})".format(source_file, patch_file)
     elif type == "context" or type == "unified":
-        return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
+        if recursive and source_directories:
+            return "(cd \\$(bazel info workspace); patch --directory {} -p{} < {})".format(source_file, source_file.count("/") + 1, patch_file)
+        else:
+            return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
     return None
 
 def _detect_multifile(args):
@@ -137,6 +147,7 @@ def _diff_rule_impl(ctx):
         fail("error: srcs attr of diff rule must contain exactly two targets unless --from-file or --to-file are specified")
 
     type = _determine_patch_type(ctx.attr.args)
+    recursive = _is_recursive(ctx.attr.args)
 
     command = _build_command(
         ctx.bin_dir.path,
@@ -182,7 +193,7 @@ def _diff_rule_impl(ctx):
         if patchable:
             # Show a command to patch the source file if it's a (bazel) source file.
             # NB: the error message we print here allows the user to be in any working directory.
-            patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path)
+            patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path, recursive, ctx.attr.source_directories)
             if patch_cmd != None:
                 patch_msg = """
     To accept the diff, run:
@@ -210,6 +221,14 @@ diff_rule = rule(
               Additional arguments to pass to the diff command.
             """,
             default = [],
+        ),
+        "source_directories": attr.bool(
+            doc = """\
+              Whether all of the patchable source inputs in `srcs` are directories. This is expected
+              to be passed in by a wrapper macro as File.is_directory does not detect source directory
+              inputs.
+            """,
+            default = False,
         ),
         "srcs": attr.label_list(allow_files = True),
         "patch": attr.output(
