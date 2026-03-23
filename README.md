@@ -30,9 +30,22 @@ diff(
 )
 ```
 
+### Compare binary files
+
+```starlark
+load("@diff.bzl//diff:defs.bzl", "cmp")
+
+cmp(
+    name = "compare_bins",
+    args = ["--bytes", "4", "--verbose"],
+    srcs = ["bin_a", "bin_b"],
+    out = "cmp_output"
+)
+```
+
 ### Keep generated sources up to date
 
-Pass `validate = 1` to `diff` to create a build validation error when a generated source input diverges from the output tree file.
+Pass `validate = 1` to `cmp` or `diff` to create a build validation error when a generated source input diverges from the output tree file.
 
 ```starlark
 load("@diff.bzl//diff:defs.bzl", "diff")
@@ -47,7 +60,7 @@ diff(
 )
 ```
 
-A build error message with command to run to patch the file will be output.
+An error message with command to run to patch the file will be output.
 
 ```
 ERROR: diff command exited with non-zero status.
