@@ -1,0 +1,22 @@
+diff --unified --new-file --to-file diff/tests/case_to_file_directory_newfile.a diff/tests/case_to_file_directory_newfile.b/cow.txt diff/tests/case_to_file_directory_newfile.a/cow.txt
+--- diff/tests/case_to_file_directory_newfile.b/cow.txt 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_to_file_directory_newfile.a/cow.txt 1970-01-01 00:00:00.000000000 +0000
+@@ -0,0 +1 @@
++moo, moooooo!
+diff --unified --new-file --to-file diff/tests/case_to_file_directory_newfile.a diff/tests/case_to_file_directory_newfile.b/file diff/tests/case_to_file_directory_newfile.a/file
+--- diff/tests/case_to_file_directory_newfile.b/file 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_to_file_directory_newfile.a/file 1970-01-01 00:00:00.000000000 +0000
+@@ -1 +1 @@
+-b
++a
+diff --unified --new-file --to-file diff/tests/case_to_file_directory_newfile.a diff/tests/case_to_file_directory_newfile.c/cow.txt diff/tests/case_to_file_directory_newfile.a/cow.txt
+--- diff/tests/case_to_file_directory_newfile.c/cow.txt 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_to_file_directory_newfile.a/cow.txt 1970-01-01 00:00:00.000000000 +0000
+@@ -0,0 +1 @@
++moo, moooooo!
+diff --unified --new-file --to-file diff/tests/case_to_file_directory_newfile.a diff/tests/case_to_file_directory_newfile.c/file diff/tests/case_to_file_directory_newfile.a/file
+--- diff/tests/case_to_file_directory_newfile.c/file 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_to_file_directory_newfile.a/file 1970-01-01 00:00:00.000000000 +0000
+@@ -1 +1 @@
+-c
++a
