@@ -35,18 +35,18 @@ def _determine_patch_type(args):
 
     return "normal"
 
-def _is_recursive(args):
+def _is_newfile(args):
     for arg in args:
         arg = arg.lstrip(" ")
-        if arg.startswith("-r") or arg.startswith("--recursive"):
+        if arg.startswith("-N") or arg.startswith("--new-file"):
             return True
     return False
 
-def _patch_cmd(type, source_file, patch_file, recursive, source_directories):
+def _patch_cmd(type, source_file, patch_file, newfile):
     if type == "normal":
         return "(cd \\$(bazel info workspace); patch -p0 {} < {})".format(source_file, patch_file)
     elif type == "context" or type == "unified":
-        if recursive and source_directories:
+        if newfile:
             return "(cd \\$(bazel info workspace); patch --directory {} -p{} < {})".format(source_file, source_file.count("/") + 1, patch_file)
         else:
             return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
@@ -115,19 +115,44 @@ fi
         )
     return command
 
-def _is_patchable(type, files, from_file, to_file, for_or_to_file_path):
-    filtered_files = [file for file in files if file.path != for_or_to_file_path]
+def _is_patchable(type, files, from_file, to_file, from_or_to_file_path, newfile):
+    """Check whether the produced patch can be applied to the source tree.
+
+    A two file diff is patchable if first input exists in the source tree.
+
+    A multi-file diff, e.g., using --to-file, is patchable if all of the inputs
+    minus the --to-file target exists in the source tree. If the inputs are
+    directories, the patch type must be --unified or or --context, otherwise it
+    is not considered patchable since it cannot be applied. If --new-file is used,
+    the diff is not patchable.
+
+    Args:
+        type: The type of patch, e.g. "unified", "context", or "default"
+        files: The input files
+        from_file: Whether --from-file was passed as an argument to diff
+        to_file: Whether --to-file was passed as an argument to diff
+        from_or_to_file_path: Path of the --from-file or --to-file file, or None
+        newfile: Whether this diff handles new files in a directory (-N, --new-file)
+    Return: True if the diff is patchable
+    """
     if from_file:
         # doesn't make sense for source patching
         return False
     elif to_file:
         # cannot apply a multifile normal patch since there are no file labels
-        if type == "normal":
+        if type == "normal" and len(files) > 2:
+            return False
+
+        # We can't patch multiple directory inputs when --new-file is used.
+        # Patching with --new-file requires running a patch from within the
+        # input directory and removing prefixes, but breaks when there is more
+        # than one input directory being patched.
+        if newfile and len(files) > 2:
             return False
 
         # every other file must be a source file
-        for file in filtered_files:
-            if not file.is_source:
+        for file in files:
+            if file.path != from_or_to_file_path and not file.is_source:
                 return False
         return True
     else:
@@ -147,7 +172,7 @@ def _diff_rule_impl(ctx):
         fail("error: srcs attr of diff rule must contain exactly two targets unless --from-file or --to-file are specified")
 
     type = _determine_patch_type(ctx.attr.args)
-    recursive = _is_recursive(ctx.attr.args)
+    newfile = _is_newfile(ctx.attr.args)
 
     command = _build_command(
         ctx.bin_dir.path,
@@ -178,7 +203,7 @@ def _diff_rule_impl(ctx):
     )
 
     validation_outputs = []
-    patchable = _is_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path)
+    patchable = _is_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
     source_patch_outputs = [ctx.outputs.patch] if patchable else []
 
     if ctx.attr.validate == 1:
@@ -193,7 +218,7 @@ def _diff_rule_impl(ctx):
         if patchable:
             # Show a command to patch the source file if it's a (bazel) source file.
             # NB: the error message we print here allows the user to be in any working directory.
-            patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path, recursive, ctx.attr.source_directories)
+            patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path, newfile)
             if patch_cmd != None:
                 patch_msg = """
     To accept the diff, run:
@@ -221,14 +246,6 @@ diff_rule = rule(
               Additional arguments to pass to the diff command.
             """,
             default = [],
-        ),
-        "source_directories": attr.bool(
-            doc = """\
-              Whether all of the patchable source inputs in `srcs` are directories. This is expected
-              to be passed in by a wrapper macro as File.is_directory does not detect source directory
-              inputs.
-            """,
-            default = False,
         ),
         "srcs": attr.label_list(allow_files = True),
         "patch": attr.output(

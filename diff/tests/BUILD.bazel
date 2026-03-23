@@ -95,29 +95,69 @@ diff(
 )
 
 diff(
-    name = "case_recursive",
+    name = "case_directory",
     srcs = [
-        "case_recursive.dir_a",
-        "case_recursive.dir_b",
+        "case_directory.a",
+        "case_directory.b",
     ],
     args = [
-        "--recursive",
+        "--unified",
+    ],
+)
+
+diff(
+    name = "case_directory_assert_patch",
+    srcs = [
+        "case_directory.golden.patch",
+        ":case_directory",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_directory_newfile",
+    srcs = [
+        "case_directory_newfile.a",
+        "case_directory_newfile.b",
+    ],
+    args = [
         "--new-file",
         "--unified",
     ],
 )
 
 diff(
-    name = "case_recursive_assert_patch",
+    name = "case_directory_newfile_assert_patch",
     srcs = [
-        "case_recursive.golden.patch",
-        ":case_recursive",
+        "case_directory_newfile.golden.patch",
+        ":case_directory_newfile",
     ],
     validate = 1,
 )
 
 diff(
-    name = "case_recursive_empty_dirs",
+    name = "case_directory_recursive",
+    srcs = [
+        "case_directory_recursive.a",
+        "case_directory_recursive.b",
+    ],
+    args = [
+        "--recursive",
+        "--unified",
+    ],
+)
+
+diff(
+    name = "case_directory_recursive_assert_patch",
+    srcs = [
+        "case_directory_recursive.golden.patch",
+        ":case_directory_recursive",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_directory_empty_dirs",
     srcs = [
         partial.make(
             copy_to_directory,  # Create an empty directory
@@ -127,7 +167,6 @@ diff(
         ),
     ],
     args = [
-        "--recursive",
         "--unified",
     ],
     validate = 1,
@@ -175,6 +214,53 @@ diff(
     srcs = [
         "case_to_file.golden.patch",
         ":case_to_file",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_to_file_directory",
+    srcs = [
+        "case_to_file_directory.a",
+        "case_to_file_directory.b",
+        "case_to_file_directory.c",
+    ],
+    args = [
+        "--unified",
+        "--to-file",
+        "$(execpath case_to_file_directory.a)",
+    ],
+)
+
+diff(
+    name = "case_to_file_directory_assert_patch",
+    srcs = [
+        "case_to_file_directory.golden.patch",
+        ":case_to_file_directory",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_to_file_directory_newfile",
+    srcs = [
+        "case_to_file_directory_newfile.a",
+        "case_to_file_directory_newfile.b",
+        "case_to_file_directory_newfile.c",
+    ],
+    args = [
+        "--unified",
+        "--new-file",
+        "--to-file",
+        "$(execpath case_to_file_directory_newfile.a)",
+    ],
+)
+
+diff(
+    name = "case_to_file_directory_newfile_assert_patch",
+    srcs = [
+        "case_to_file_directory_newfile.golden.patch",
+        ":case_to_file_directory_newfile",
     ],
     validate = 1,
 )
@@ -267,13 +353,21 @@ build_test(
         ":case_unified_assert_patch",
         ":case_context",
         ":case_context_assert_patch",
-        ":case_recursive",
-        ":case_recursive_assert_patch",
-        ":case_recursive_empty_dirs",
+        ":case_directory",
+        ":case_directory_assert_patch",
+        ":case_directory_newfile",
+        ":case_directory_newfile_assert_patch",
+        ":case_directory_recursive",
+        ":case_directory_recursive_assert_patch",
+        ":case_directory_empty_dirs",
         ":case_from_file",
         ":case_from_file_assert_patch",
         ":case_to_file",
         ":case_to_file_assert_patch",
+        ":case_to_file_directory",
+        ":case_to_file_directory_assert_patch",
+        ":case_to_file_directory_newfile",
+        ":case_to_file_directory_newfile_assert_patch",
         ":case_diff_genrule",
         ":case_cmp_genrule",
         ":case_cmp_same_binary",

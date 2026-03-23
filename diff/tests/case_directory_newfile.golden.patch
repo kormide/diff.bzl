@@ -1,0 +1,11 @@
+diff --new-file --unified diff/tests/case_directory_newfile.a/cow.txt diff/tests/case_directory_newfile.b/cow.txt
+--- diff/tests/case_directory_newfile.a/cow.txt 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_directory_newfile.b/cow.txt 1970-01-01 00:00:00.000000000 +0000
+@@ -0,0 +1 @@
++moo, moooooo!
+diff --new-file --unified diff/tests/case_directory_newfile.a/file.txt diff/tests/case_directory_newfile.b/file.txt
+--- diff/tests/case_directory_newfile.a/file.txt 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_directory_newfile.b/file.txt 1970-01-01 00:00:00.000000000 +0000
+@@ -1 +1,2 @@
+ hello
++goodbye

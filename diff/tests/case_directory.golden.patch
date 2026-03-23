@@ -1,0 +1,6 @@
+diff --unified diff/tests/case_directory.a/file.txt diff/tests/case_directory.b/file.txt
+--- diff/tests/case_directory.a/file.txt 1970-01-01 00:00:00.000000000 +0000
++++ diff/tests/case_directory.b/file.txt 1970-01-01 00:00:00.000000000 +0000
+@@ -1 +1,2 @@
+ hello
++goodbye
