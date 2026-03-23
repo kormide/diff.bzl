@@ -14,6 +14,32 @@ cmp(<a href="#cmp-name">name</a>, <a href="#cmp-srcs">srcs</a>, <a href="#cmp-ar
 
 Runs cmp (binary diff) between two files and returns the output.
 
+Examples:
+
+Compare two binaries.
+
+```starlark
+cmp(
+    name = "compare_bins",
+    args = ["--bytes", "4", "--verbose"],
+    srcs = ["bin_a", "bin_b"],
+    out = "cmp_output"
+)
+```
+
+Run cmp in a genrule.
+
+```starlark
+genrule(
+    name = "run_cmp",
+    srcs = ["bin_a", "bin_b"],
+    outs = ["cmp_output"],
+    cmd = "$(CMP_BIN) --verbose $(execpath bin_a) $(execpath bin_b) > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+```
+
+
 **PARAMETERS**
 
 
@@ -58,6 +84,18 @@ diff(
     args = ["--unified", "--from-file", "$(execpath a.txt)"],
     srcs = ["a.txt", "b.txt", "c.txt"],
     patch = "a.patch"
+)
+```
+
+Run diff in a genrule.
+
+```starlark
+genrule(
+    name = "run_diff",
+    srcs = ["a.txt", "b.txt"],
+    outs = ["a.patch"],
+    cmd = "$(DIFF_BIN) --unified $(execpath a.txt) $(execpath b.txt) > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
 )
 ```
 
