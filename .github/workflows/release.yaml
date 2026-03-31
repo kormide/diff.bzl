@@ -24,6 +24,8 @@ jobs:
     with:
       release_files: diff.bzl-*.tar.gz
       prerelease: false
+      draft: true
+      attest: true
       tag_name: ${{ inputs.tag_name || github.ref_name }}
   publish:
     needs: release
@@ -32,3 +34,8 @@ jobs:
       tag_name: ${{ inputs.tag_name || github.ref_name }}
     secrets:
       publish_token: ${{ secrets.publish_token || secrets.BCR_PUBLISH_TOKEN }}
+  finalize:
+    # Publish the draft release
+    uses: softprops/action-gh-release@v2
+    with:
+      tag_name: ${{ inputs.tag_name || github.ref_name }}
