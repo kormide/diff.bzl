@@ -8,6 +8,7 @@ stardoc(
     symbol_names = [
         "cmp",
         "diff",
+        "sdiff",
     ],
     visibility = ["//docs:__pkg__"],
     deps = ["//diff:defs"],

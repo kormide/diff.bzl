@@ -115,3 +115,52 @@ to `args`. If overriding arguments, --unified must be added explicitly._
 | <a id="diff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule   |  none |
 
 
+<a id="sdiff"></a>
+
+## sdiff
+
+<pre>
+load("@diff.bzl//diff:defs.bzl", "sdiff")
+
+sdiff(<a href="#sdiff-name">name</a>, <a href="#sdiff-srcs">srcs</a>, <a href="#sdiff-args">args</a>, <a href="#sdiff-out">out</a>, <a href="#sdiff-kwargs">**kwargs</a>)
+</pre>
+
+Produce a side-by-side diff of two files.
+
+Examples:
+
+Compare two files.
+
+```starlark
+sdiff(
+    name = "side_by_side",
+    srcs = ["a.txt", "b.txt"],
+    out = "comparison.txt"
+)
+```
+
+Run sdiff in a genrule.
+
+```starlark
+genrule(
+    name = "run_sdiff",
+    srcs = ["a.txt", "b.txt"],
+    outs = ["comparison"],
+    cmd = "$(SDIFF_BIN) $(execpath a.txt) $(execpath b.txt) > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+```
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="sdiff-name"></a>name |  The name of the rule   |  none |
+| <a id="sdiff-srcs"></a>srcs |  The two files to compare.   |  none |
+| <a id="sdiff-args"></a>args |  Additional arguments to pass to sdiff.   |  `[]` |
+| <a id="sdiff-out"></a>out |  The output file to write the side-by-side comparison to. Defaults to ${name}.out.   |  `None` |
+| <a id="sdiff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule.   |  none |
+
+

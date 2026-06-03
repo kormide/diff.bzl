@@ -39,6 +39,7 @@ bzl_library(
     deps = [
         "//diff/private:cmp",
         "//diff/private:diff",
+        "//diff/private:sdiff",
         "@bazel_skylib//lib:partial",
     ],
 )
