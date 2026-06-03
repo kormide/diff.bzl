@@ -89,7 +89,7 @@ echo "$DIFF" | sed -r 's#^((---|\\+\\+\\+)\\s+)({}/)?(\\S+)\\s+{}#\\1\\4 {}#' > 
         )
     elif type == "context":
         # assumes LC_TIME=C
-        match_timestamp = "\\S+\\s+\\S+\\s+[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\\s+[0-9]{4}"
+        match_timestamp = "\\S+\\s+\\S+\\s+[0-9]{1,2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\\s+[0-9]{4}"
         command = """
 DIFF=$({} $@)
 if [[ $? == '2' ]]; then
