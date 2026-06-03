@@ -43,6 +43,19 @@ cmp(
 )
 ```
 
+### Produce human-readable diffs
+
+```starlark
+# Side-by-side diff
+load("@diff.bzl//diff:defs.bzl", "sdiff")
+
+sdiff(
+    name = "side_by_side",
+    srcs = ["a.txt", "b.txt"],
+    out = "compare"
+)
+```
+
 ### Keep generated sources up to date
 
 Pass `validate = 1` to `cmp` or `diff` to create a build validation error when a generated source input diverges from the output tree file.
