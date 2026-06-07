@@ -56,6 +56,17 @@ sdiff(
 )
 ```
 
+```starlark
+# Three way diff
+load("@diff.bzl", "diff3")
+
+sdiff(
+    name = "three_way_diff",
+    srcs = ["my.txt", "old.txt", "yours.txt"],
+    out = "compare"
+)
+```
+
 ### Keep generated sources up to date
 
 Pass `validate = 1` to `cmp` or `diff` to create a build validation error when a generated source input diverges from the output tree file.

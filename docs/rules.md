@@ -115,6 +115,66 @@ to `args`. If overriding arguments, --unified must be added explicitly._
 | <a id="diff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule   |  none |
 
 
+<a id="diff3"></a>
+
+## diff3
+
+<pre>
+load("@diff.bzl//diff:defs.bzl", "diff3")
+
+diff3(<a href="#diff3-name">name</a>, <a href="#diff3-srcs">srcs</a>, <a href="#diff3-args">args</a>, <a href="#diff3-out">out</a>, <a href="#diff3-kwargs">**kwargs</a>)
+</pre>
+
+Compare three files line by line.
+
+Examples:
+
+Compare three files.
+
+```starlark
+diff3(
+    name = "compare",
+    srcs = ["my.txt", "old.txt", "your.txt"],
+    out = "comparison"
+)
+```
+
+Output the merged file.
+
+```starlark
+diff3(
+    name = "compare",
+    args = ["--merge"],
+    srcs = ["my.txt", "old.txt", "your.txt"],
+    out = "comparison"
+)
+```
+
+Run diff3 in a genrule.
+
+```starlark
+genrule(
+    name = "run_sdiff",
+    srcs = ["my.txt", "old.txt", "your.txt"],
+    outs = ["comparison"],
+    cmd = "$(DIFF3_BIN) $(execpath my.txt) $(execpath old.txt) $(execpath your.txt) > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+```
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="diff3-name"></a>name |  The name of the rule   |  none |
+| <a id="diff3-srcs"></a>srcs |  The three files to compare.   |  none |
+| <a id="diff3-args"></a>args |  Additional arguments to pass to diff3.   |  `[]` |
+| <a id="diff3-out"></a>out |  The file to write the diff3 output to to. Defaults to ${name}.out.   |  `None` |
+| <a id="diff3-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule.   |  none |
+
+
 <a id="sdiff"></a>
 
 ## sdiff
@@ -127,40 +187,46 @@ sdiff(<a href="#sdiff-name">name</a>, <a href="#sdiff-srcs">srcs</a>, <a href="#
 
 Produce a side-by-side diff of two files.
 
-Examples:
+    Examples:
 
-Compare two files.
+    Compare two files.
+g
+    ```starlark
+    sdiff(
+        name = "side_by_side",
+        srcs = ["a.txt", "b.txt"],
+        out = "comparison.txt"
+    )
+    ```
 
-```starlark
-sdiff(
-    name = "side_by_side",
-    srcs = ["a.txt", "b.txt"],
-    out = "comparison.txt"
-)
-```
+    Run sdiff in a genrule.
 
-Run sdiff in a genrule.
+    ```starlark
+    genrule(
+        name = "run_sdiff",
+        srcs = ["a.txt", "b.txt"],
+        outs = ["comparison"],
+        cmd = "$(SDIFF_BIN) $(execpath a.txt) $(execpath b.txt) > $@",
+        toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+    )
+    ```
 
-```starlark
-genrule(
-    name = "run_sdiff",
-    srcs = ["a.txt", "b.txt"],
-    outs = ["comparison"],
-    cmd = "$(SDIFF_BIN) $(execpath a.txt) $(execpath b.txt) > $@",
-    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
-)
-```
-
+    Args:
+        name: The name of the rule
+        srcs: The two files to compare.
+        args: Additional arguments to pass to sdiff.
+        out: The output file to write the side-by-side comparison to. Defaults to ${name}.out.
+        **kwargs: Additional arguments to pass to the underlying rule.
 
 **PARAMETERS**
 
 
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
-| <a id="sdiff-name"></a>name |  The name of the rule   |  none |
-| <a id="sdiff-srcs"></a>srcs |  The two files to compare.   |  none |
-| <a id="sdiff-args"></a>args |  Additional arguments to pass to sdiff.   |  `[]` |
-| <a id="sdiff-out"></a>out |  The output file to write the side-by-side comparison to. Defaults to ${name}.out.   |  `None` |
-| <a id="sdiff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule.   |  none |
+| <a id="sdiff-name"></a>name |  <p align="center"> - </p>   |  none |
+| <a id="sdiff-srcs"></a>srcs |  <p align="center"> - </p>   |  none |
+| <a id="sdiff-args"></a>args |  <p align="center"> - </p>   |  `[]` |
+| <a id="sdiff-out"></a>out |  <p align="center"> - </p>   |  `None` |
+| <a id="sdiff-kwargs"></a>kwargs |  <p align="center"> - </p>   |  none |
 
 
