@@ -2,7 +2,7 @@ load("@bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//diff:defs.bzl", "cmp", "diff", "sdiff")
+load("//diff:defs.bzl", "cmp", "diff", "diff3", "sdiff")
 
 diff(
     name = "case_normal",
@@ -344,6 +344,125 @@ diff(
     validate = 1,
 )
 
+diff3(
+    name = "case_diff3",
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "a",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "b",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "c",
+                "",
+            ],
+        ),
+    ],
+)
+
+diff(
+    name = "case_diff3_assert_output",
+    srcs = [
+        ":case_diff3",
+        partial.make(
+            write_file,
+            content = [
+                "====",
+                "1:1c",
+                "  a",
+                "2:1c",
+                "  b",
+                "3:1c",
+                "  c",
+                "",
+            ],
+        ),
+    ],
+    validate = 1,
+)
+
+diff3(
+    name = "case_diff3_merge",
+    srcs = [
+        partial.make(
+            write_file,
+            content = [
+                "foobar",
+                "a",
+                "moo",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "foobar",
+                "b",
+                "",
+            ],
+        ),
+        partial.make(
+            write_file,
+            content = [
+                "foobar",
+                "b",
+                "cow",
+            ],
+        ),
+    ],
+    args = [
+        "--merge",
+        "--label",
+        "a",
+        "--label",
+        "b",
+        "--label",
+        "c",
+    ],
+)
+
+diff(
+    name = "case_diff3_merge_assert_output",
+    srcs = [
+        ":case_diff3_merge",
+        partial.make(
+            write_file,
+            content = [
+                "foobar",
+                "<<<<<<< a",
+                "a",
+                "moo",
+                "||||||| b",
+                "b",
+                "=======",
+                "b",
+                "cow>>>>>>> c",
+                "",
+            ],
+        ),
+    ],
+    validate = 1,
+)
+
+genrule(
+    name = "case_diff3_genrule",
+    srcs = [],
+    outs = ["diff3_help.txt"],
+    cmd = "$(DIFF3_BIN) --help > $@",
+    toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+
 sdiff(
     name = "case_sdiff",
     srcs = [
@@ -424,6 +543,11 @@ build_test(
         ":case_cmp_different_binary_assert_output",
         ":case_cmp_verbose",
         ":case_cmp_verbose_assert_output",
+        ":case_diff3",
+        ":case_diff3_assert_output",
+        ":case_diff3_merge",
+        ":case_diff3_merge_assert_output",
+        ":case_diff3_genrule",
         ":case_sdiff",
         ":case_sdiff_assert_output",
     ],
