@@ -20,7 +20,7 @@ See the [docs](./docs) folder for rule documentation and examples.
 ### Create different types of patches
 
 ```starlark
-load("@diff.bzl//diff:defs.bzl", "diff")
+load("@diff.bzl", "diff")
 
 diff(
     name = "patch"
@@ -33,7 +33,7 @@ diff(
 ### Compare binary files
 
 ```starlark
-load("@diff.bzl//diff:defs.bzl", "cmp")
+load("@diff.bzl", "cmp")
 
 cmp(
     name = "compare_bins",
@@ -47,7 +47,7 @@ cmp(
 
 ```starlark
 # Side-by-side diff
-load("@diff.bzl//diff:defs.bzl", "sdiff")
+load("@diff.bzl", "sdiff")
 
 sdiff(
     name = "side_by_side",
@@ -61,7 +61,7 @@ sdiff(
 Pass `validate = 1` to `cmp` or `diff` to create a build validation error when a generated source input diverges from the output tree file.
 
 ```starlark
-load("@diff.bzl//diff:defs.bzl", "diff")
+load("@diff.bzl", "diff")
 
 diff(
     name = "foo",
