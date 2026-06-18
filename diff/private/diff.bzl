@@ -229,18 +229,28 @@ def _diff_rule_impl(ctx):
     ERROR: diff command exited with non-zero status.
     {}""".format(patch_msg)))
 
+    source_patches_depset = depset(source_patch_outputs)
+
+    source_patch_output_groups = {group: source_patches_depset for group in ctx.attr.source_patch_output_groups}
+
     return [
         DefaultInfo(files = depset(outputs)),
         OutputGroupInfo(
             _validation = depset(validation_outputs),
-            # By reading the Build Events, a Bazel wrapper can identify this diff output group and apply the patch.
-            diff_bzl__patch = depset(source_patch_outputs),
+            **source_patch_output_groups
         ),
     ]
 
 diff_rule = rule(
     implementation = _diff_rule_impl,
     attrs = {
+        "source_patch_output_groups": attr.string_list(
+            doc = """\
+            Additional output groups to add source file patches to. Output groups can be used to categorize sets of patches
+            that a Bazel wrapper can identify and apply by reading build events.
+            """,
+            default = ["diff_bzl__patch"],
+        ),
         "args": attr.string_list(
             doc = """\
               Additional arguments to pass to the diff command.
