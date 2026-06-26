@@ -55,7 +55,7 @@ def cmp(name, srcs, args = [], out = None, **kwargs):
         **kwargs
     )
 
-def diff(name, srcs, args = ["--unified"], patch = None, **kwargs):
+def diff(name, srcs, args = ["--unified"], patch = None, source_patch_output_groups = ["diff_bzl__patch"], **kwargs):
     """Runs a diff between files and return a patch.
 
     Examples:
@@ -98,9 +98,10 @@ def diff(name, srcs, args = ["--unified"], patch = None, **kwargs):
 
     Args:
         name: The name of the rule
-        srcs: The files to compare.
+        srcs: The files to compare
         args: Additional arguments to pass to diff
         patch: The output file to write the diff to. Defaults to ${name}.patch.
+        source_patch_output_groups: Additional output groups to add source file patches to
         **kwargs: Additional arguments to pass to the underlying rule
     """
     for i in range(len(srcs)):
@@ -114,6 +115,7 @@ def diff(name, srcs, args = ["--unified"], patch = None, **kwargs):
         args = args,
         srcs = srcs,
         patch = patch or name + ".patch",
+        source_patch_output_groups = source_patch_output_groups,
         **kwargs
     )
 

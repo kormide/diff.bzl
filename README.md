@@ -97,6 +97,22 @@ This also works for directories.
 
 To validate all `diff`, `cmp`, etc. actions by default, set `common --@diff.bzl//diff:validate=true` in your bazelrc.
 
-### Support automatic patch workflows for CI
+### Support automatic patch workflows
 
-This ruleset outputs patches into a distinct `diff_bzl__patch` output group making it easier for patches to be collected and then applied using automation. See the [build & patch](./examples/build-and-patch.sh) example script.
+This ruleset outputs patches for source tree files into the `diff_bzl__patch` output group by default, making it easier to collect and apply patches in an automated fashion. See the [build & patch](./examples/build-and-patch.sh) example script.
+
+The output groups for source patches can be customized via the `source_patch_output_groups` attribute. This can be used to categorize types of patches. For example, `diff` targets with `source_patch_output_groups = ["autopatch"]` might identify patches that should automatically be applied if the build fails on CI, whereas a `"snapshot_test"` group could identify patches that require human review, etc.
+
+```starlark
+diff(
+    name = "foo",
+    srcs = [
+      "foo.pb.go",
+      ":foo_generated",
+    ],
+    validate = 1,
+    source_patch_output_groups = ["autopatch"],
+)
+```
+
+NB: Only patches for files in the source tree are placed in the above output group(s). Patches for files in the output tree are not included as they should not be modified outside of Bazel.

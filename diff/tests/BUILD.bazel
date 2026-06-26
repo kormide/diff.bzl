@@ -265,6 +265,53 @@ diff(
     validate = 1,
 )
 
+diff(
+    name = "case_source_patch_default_output_group",
+    srcs = [
+        "case_source_patch_default_output_group.a",
+        "case_source_patch_default_output_group.b",
+    ],
+)
+
+filegroup(
+    name = "case_source_patch_default_output_group_output",
+    srcs = [":case_source_patch_default_output_group"],
+    output_group = "diff_bzl__patch",
+)
+
+diff(
+    name = "case_source_patch_default_output_group_assert_patch",
+    srcs = [
+        "case_source_patch_default_output_group.golden.patch",
+        ":case_source_patch_default_output_group_output",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_source_patch_custom_output_group",
+    srcs = [
+        "case_source_patch_custom_output_group.a",
+        "case_source_patch_custom_output_group.b",
+    ],
+    source_patch_output_groups = ["autopatch"],
+)
+
+filegroup(
+    name = "case_source_patch_custom_output_group_output",
+    srcs = [":case_source_patch_custom_output_group"],
+    output_group = "autopatch",
+)
+
+diff(
+    name = "case_source_patch_custom_output_group_assert_patch",
+    srcs = [
+        "case_source_patch_custom_output_group.golden.patch",
+        ":case_source_patch_custom_output_group_output",
+    ],
+    validate = 1,
+)
+
 genrule(
     name = "case_diff_genrule",
     srcs = [],
@@ -536,6 +583,12 @@ build_test(
         ":case_to_file_directory_assert_patch",
         ":case_to_file_directory_newfile",
         ":case_to_file_directory_newfile_assert_patch",
+        ":case_source_patch_default_output_group",
+        ":case_source_patch_default_output_group_output",
+        ":case_source_patch_default_output_group_assert_patch",
+        ":case_source_patch_custom_output_group",
+        ":case_source_patch_custom_output_group_output",
+        ":case_source_patch_custom_output_group_assert_patch",
         ":case_diff_genrule",
         ":case_cmp_genrule",
         ":case_cmp_same_binary",

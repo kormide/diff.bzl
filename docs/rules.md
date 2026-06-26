@@ -59,7 +59,7 @@ genrule(
 <pre>
 load("@diff.bzl//diff:defs.bzl", "diff")
 
-diff(<a href="#diff-name">name</a>, <a href="#diff-srcs">srcs</a>, <a href="#diff-args">args</a>, <a href="#diff-patch">patch</a>, <a href="#diff-kwargs">**kwargs</a>)
+diff(<a href="#diff-name">name</a>, <a href="#diff-srcs">srcs</a>, <a href="#diff-args">args</a>, <a href="#diff-patch">patch</a>, <a href="#diff-source_patch_output_groups">source_patch_output_groups</a>, <a href="#diff-kwargs">**kwargs</a>)
 </pre>
 
 Runs a diff between files and return a patch.
@@ -109,9 +109,10 @@ to `args`. If overriding arguments, --unified must be added explicitly._
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="diff-name"></a>name |  The name of the rule   |  none |
-| <a id="diff-srcs"></a>srcs |  The files to compare.   |  none |
+| <a id="diff-srcs"></a>srcs |  The files to compare   |  none |
 | <a id="diff-args"></a>args |  Additional arguments to pass to diff   |  `["--unified"]` |
 | <a id="diff-patch"></a>patch |  The output file to write the diff to. Defaults to ${name}.patch.   |  `None` |
+| <a id="diff-source_patch_output_groups"></a>source_patch_output_groups |  Additional output groups to add source file patches to   |  `["diff_bzl__patch"]` |
 | <a id="diff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule   |  none |
 
 
