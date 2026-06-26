@@ -56,7 +56,7 @@ def cmp(name, srcs, args = [], out = None, **kwargs):
     )
 
 def diff(name, srcs, args = ["--unified"], patch = None, source_patch_output_groups = ["diff_bzl__patch"], **kwargs):
-    """Runs a diff between files and return a patch.
+    """Runs a diff between files and returns a patch.
 
     Examples:
 
@@ -184,7 +184,7 @@ def sdiff(name, srcs, args = [], out = None, **kwargs):
     Examples:
 
     Compare two files.
-g
+
     ```starlark
     sdiff(
         name = "side_by_side",
