@@ -1,24 +1,9 @@
 """Implements the cmp rule."""
 
 load("//diff/private:options.bzl", "DiffOptionsInfo")
+load("//diff/private:validate.bzl", "validate")
 
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
-
-def _validate(ctx, error_message):
-    cmp_valid_file = ctx.actions.declare_file(ctx.outputs.out.path + ".valid")
-    ctx.actions.run_shell(
-        inputs = [ctx.outputs.out],
-        outputs = [cmp_valid_file],
-        # assert that the cmp output is empty
-        command = """
-        touch {}
-        if [ "$(head -c 1 {})" != "" ]; then
-            >&2 echo "{}"
-            exit 1
-        fi
-        """.format(cmp_valid_file.path, ctx.outputs.out.path, error_message),
-    )
-    return cmp_valid_file
 
 def _cmp_rule_impl(ctx):
     CMP_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.cmp_bin
@@ -68,7 +53,7 @@ fi
         (cd \\$(bazel info workspace); cp {file2} {file1})
         """.format(file1 = ctx.files.srcs[0].path, file2 = ctx.files.srcs[1].path) if ctx.files.srcs[0].is_source else ""
 
-        validation_outputs.append(_validate(ctx, """\
+        validation_outputs.append(validate(ctx, ctx.outputs.out, ctx.outputs.out.path + ".valid", """\
         ERROR: cmp command exited with non-zero status.
         {msg}""".format(msg = msg)))
 
@@ -109,6 +94,14 @@ cmp_rule = rule(
             values = [-1, 0, 1],
         ),
         "_options": attr.label(default = "//diff:diff_options"),
+        "_emit_test_xml": attr.label(
+            default = "//tools/test:emit-test-xml.sh",
+            allow_single_file = True,
+        ),
+        "_validate_script": attr.label(
+            default = "//diff/private:validate.sh",
+            allow_single_file = True,
+        ),
     },
     toolchains = [DIFFUTILS_TOOLCHAIN_TYPE],
 )

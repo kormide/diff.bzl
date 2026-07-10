@@ -2,24 +2,9 @@
 
 load("@bazel_lib//lib:expand_make_vars.bzl", "expand_locations")
 load("//diff/private:options.bzl", "DiffOptionsInfo")
+load("//diff/private:validate.bzl", "validate")
 
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
-
-def _validate(ctx, error_message):
-    diff_valid_file = ctx.actions.declare_file(ctx.outputs.patch.path + ".valid")
-    ctx.actions.run_shell(
-        inputs = [ctx.outputs.patch],
-        outputs = [diff_valid_file],
-        # assert that the diff output is empty
-        command = """
-        touch {}
-        if [ "$(head -c 1 {})" != "" ]; then
-            >&2 echo "{}"
-            exit 1
-        fi
-        """.format(diff_valid_file.path, ctx.outputs.patch.path, error_message),
-    )
-    return diff_valid_file
 
 def _determine_patch_type(args):
     for arg in args:
@@ -225,7 +210,7 @@ def _diff_rule_impl(ctx):
     {}
                 """.format(patch_cmd)
 
-        validation_outputs.append(_validate(ctx, """\
+        validation_outputs.append(validate(ctx, ctx.outputs.patch, ctx.outputs.patch.path + ".valid", """\
     ERROR: diff command exited with non-zero status.
     {}""".format(patch_msg)))
 
@@ -278,6 +263,14 @@ diff_rule = rule(
             values = [-1, 0, 1],
         ),
         "_options": attr.label(default = "//diff:diff_options"),
+        "_emit_test_xml": attr.label(
+            default = "//tools/test:emit-test-xml.sh",
+            allow_single_file = True,
+        ),
+        "_validate_script": attr.label(
+            default = "//diff/private:validate.sh",
+            allow_single_file = True,
+        ),
     },
     toolchains = [DIFFUTILS_TOOLCHAIN_TYPE],
 )
