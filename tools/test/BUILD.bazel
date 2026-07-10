@@ -1,0 +1,8 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "build_test.bzl",
+    "build_test.sh",
+    "emit-test-xml.sh",
+    "run_with_xml.sh",
+])
