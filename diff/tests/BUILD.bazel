@@ -3,6 +3,7 @@ load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//diff:defs.bzl", "cmp", "diff", "diff3", "sdiff")
+load("//diff:sync_source_file.bzl", "sync_source_file")
 
 diff(
     name = "case_normal",
@@ -557,6 +558,35 @@ genrule(
     outs = ["sdiff_help.txt"],
     cmd = "$(SDIFF_BIN) --help > $@",
     toolchains = ["@diff.bzl//diff/toolchain:execution_type"],
+)
+
+sync_source_file(
+    name = "foo",
+    in_file = partial.make(
+        write_file,
+        content = [
+            "moo",
+            "",
+        ],
+    ),
+    out_file = "foo.txt",
+)
+
+sync_source_file(
+    name = "sync_bar",
+    in_file = "bar2",
+    out_file = "bar",
+)
+
+sync_source_file(
+    name = "sync_not_exist",
+    in_file = partial.make(
+        write_file,
+        content = [
+            "hello world",
+        ],
+    ),
+    out_file = "not_exist.txt",
 )
 
 build_test(

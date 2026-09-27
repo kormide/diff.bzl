@@ -5,6 +5,22 @@ load("//diff/private:options.bzl", "DiffOptionsInfo")
 
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
+DiffInfo = provider(
+    "TODO",
+    fields = {
+        "from_files": "TODO",
+        "is_from_file": "TODO",
+        "is_to_file": "TODO",
+        "to_files": "TODO",
+        "patch": "TODO",
+        "patch_cmd": "TODO",
+        "patch_type": "TODO",
+        "newfile": "TODO",
+        "files": "TODO",
+        "from_or_to_file_path": "TODO",
+    },
+)
+
 def _validate(ctx, error_message):
     diff_valid_file = ctx.actions.declare_file(ctx.outputs.patch.path + ".valid")
     ctx.actions.run_shell(
@@ -42,15 +58,18 @@ def _is_newfile(args):
             return True
     return False
 
-def _patch_cmd(type, source_file, patch_file, newfile):
+def get_patch_cmd(type, source_file, patch_file, newfile, include_stdin_redirect = True):
+    cmd = None
     if type == "normal":
-        return "(cd \\$(bazel info workspace); patch -p0 {} < {})".format(source_file, patch_file)
+        cmd = "patch -p0 {}".format(source_file.path)
     elif type == "context" or type == "unified":
         if newfile:
-            return "(cd \\$(bazel info workspace); patch --directory {} -p{} < {})".format(source_file, source_file.count("/") + 1, patch_file)
+            cmd = "patch --directory {} -p{}".format(source_file.path, source_file.path.count("/") + 1)
         else:
-            return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
-    return None
+            cmd = "patch -p0"
+    if cmd and include_stdin_redirect:
+        cmd = "{} < {}".format(cmd, patch_file.path)
+    return cmd
 
 def _detect_multifile(args):
     from_file = False
@@ -115,7 +134,7 @@ fi
         )
     return command
 
-def _is_patchable(type, files, from_file, to_file, from_or_to_file_path, newfile):
+def is_source_patchable(type, files, from_file, to_file, from_or_to_file_path, newfile):
     """Check whether the produced patch can be applied to the source tree.
 
     A two file diff is patchable if first input exists in the source tree.
@@ -203,7 +222,7 @@ def _diff_rule_impl(ctx):
     )
 
     validation_outputs = []
-    patchable = _is_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
+    patchable = is_source_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
     source_patch_outputs = [ctx.outputs.patch] if patchable else []
 
     if ctx.attr.validate == 1:
@@ -213,28 +232,51 @@ def _diff_rule_impl(ctx):
     else:
         validate = ctx.attr._options[DiffOptionsInfo].validate
 
+    patch_cmd = None
     if validate:
         patch_msg = ""
         if patchable:
             # Show a command to patch the source file if it's a (bazel) source file.
             # NB: the error message we print here allows the user to be in any working directory.
-            patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path, newfile)
+            patch_cmd = get_patch_cmd(type, ctx.files.srcs[0], ctx.outputs.patch, newfile)
             if patch_cmd != None:
+                patch_cmd = "(cd \\$(bazel info workspace); {})".format(patch_cmd)
                 patch_msg = """
     To accept the diff, run:
     {}
                 """.format(patch_cmd)
 
-        validation_outputs.append(_validate(ctx, """\
+        validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
     ERROR: diff command exited with non-zero status.
-    {}""".format(patch_msg)))
+    {}""".format(patch_msg, foo = "bar")
+        validation_outputs.append(_validate(ctx, validation_error_msg))
 
     source_patches_depset = depset(source_patch_outputs)
 
     source_patch_output_groups = {group: source_patches_depset for group in ctx.attr.source_patch_output_groups}
 
+    from_files = [ctx.files.srcs[0]]
+    to_files = [ctx.files.srcs[1]]
+    if to_file:
+        from_files = ctx.files.srcs[1:]
+        to_files = [ctx.files.srcs[0]]
+    if from_file:
+        to_files = ctx.files.srcs[1:]
+
     return [
         DefaultInfo(files = depset(outputs)),
+        DiffInfo(
+            from_files = from_files,
+            to_files = to_files,
+            is_from_file = from_file,
+            is_to_file = to_file,
+            patch = ctx.outputs.patch,
+            patch_cmd = patch_cmd,
+            patch_type = type,
+            newfile = newfile,
+            files = ctx.files.srcs,
+            from_or_to_file_path = from_or_to_file_path
+        ),
         OutputGroupInfo(
             _validation = depset(validation_outputs),
             **source_patch_output_groups
@@ -276,6 +318,9 @@ diff_rule = rule(
             """,
             default = -1,
             values = [-1, 0, 1],
+        ),
+        "validation_error_msg": attr.string(
+            doc = "",
         ),
         "_options": attr.label(default = "//diff:diff_options"),
     },
