@@ -1,0 +1,27 @@
+load("@bazel_skylib//lib:partial.bzl", "partial")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//diff:sync_source_file.bzl", "sync_source_file")
+
+sync_source_file(
+    name = "case_sync_file",
+    in_file = partial.make(
+        write_file,
+        content = [
+            "foobar",
+            "",
+        ],
+    ),
+    out_file = "case_sync_file.txt",
+)
+
+sync_source_file(
+    name = "case_sync_directory",
+    in_file = "case_sync_directory_b",
+    out_file = "case_sync_directory_a",
+)
+
+sync_source_file(
+    name = "case_sync_directory_subdirs",
+    in_file = "case_sync_directory_subdirs_b",
+    out_file = "case_sync_directory_subdirs_a",
+)
