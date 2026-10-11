@@ -115,7 +115,28 @@ diff(
 )
 
 diff(
-    name = "case_directory_newfile",
+    name = "case_directory_newfile_normal",
+    srcs = [
+        "case_directory_newfile.a",
+        "case_directory_newfile.b",
+    ],
+    args = [
+        "--new-file",
+        "--normal",
+    ],
+)
+
+diff(
+    name = "case_directory_newfile_normal_assert_patch",
+    srcs = [
+        "case_directory_newfile_normal.golden.patch",
+        ":case_directory_newfile_normal",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_directory_newfile_unified",
     srcs = [
         "case_directory_newfile.a",
         "case_directory_newfile.b",
@@ -127,10 +148,10 @@ diff(
 )
 
 diff(
-    name = "case_directory_newfile_assert_patch",
+    name = "case_directory_newfile_unified_assert_patch",
     srcs = [
-        "case_directory_newfile.golden.patch",
-        ":case_directory_newfile",
+        "case_directory_newfile_unified.golden.patch",
+        ":case_directory_newfile_unified",
     ],
     validate = 1,
 )
@@ -377,8 +398,10 @@ build_test(
         ":case_context_assert_patch",
         ":case_directory",
         ":case_directory_assert_patch",
-        ":case_directory_newfile",
-        ":case_directory_newfile_assert_patch",
+        ":case_directory_newfile_normal",
+        ":case_directory_newfile_normal_assert_patch",
+        ":case_directory_newfile_unified",
+        ":case_directory_newfile_unified_assert_patch",
         ":case_directory_recursive",
         ":case_directory_recursive_assert_patch",
         ":case_directory_empty_dirs",

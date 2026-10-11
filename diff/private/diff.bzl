@@ -115,42 +115,54 @@ fi
         )
     return command
 
-def _is_patchable(type, files, from_file, to_file, from_or_to_file_path, newfile):
-    """Check whether the produced patch can be applied to the source tree.
+def _is_source_patchable(type, files, from_file, to_file, from_or_to_file_path, newfile):
+    """Determine whether a generated patch can be reliably applied to a file in the source tree.
 
-    A two file diff is patchable if first input exists in the source tree.
+    A typical two-file patch where an "old" file is compared to a "new" file is source-
+    patchable if the "old" file exists in the source tree—applying the patch will update
+    file in the source tree. The "new" file may be a source file or a generated file.
+    The patch may also include several files if the "old" and "new" inputs are directories.
 
-    A multi-file diff, e.g., using --to-file, is patchable if all of the inputs
-    minus the --to-file target exists in the source tree. If the inputs are
-    directories, the patch type must be --unified or or --context, otherwise it
-    is not considered patchable since it cannot be applied. If --new-file is used,
-    the diff is not patchable.
+    Patches in the "normal" format are not considered to be source-patchable because,
+    experimentally, the `patch` tool has difficulty applying these patches when the inputs
+    are directories. Although patches of single files can work, we make the patchability
+    determination at analysis time and Bazel cannot distinguish between directory and file
+    source inputs, so we rule out "normal" patches entirely. See
+    https://github.com/bazelbuild/bazel/issues/12954.
+
+    A 3+ file patch created using --to-file is source-patchable if all of the "old" file
+    inputs (every file except for the --to-file target) originate from the source tree. An
+    exception to this is when the targets are directories and --new-file is specified: a
+    single `patch` invocation cannot cannot cleanly apply the new file back to each source
+    directory, so such patches are not source-patchable.
+
+    A 3+ file patch created using --from-file is not source-patchable because the
+    resulting patch represents alternative ways to change the same "old" file and is
+    therefore not deterministic.
+
+    A patch that is not source-patchable does not necessarily mean that it is impossible
+    to apply back to the source tree. It just means that it is difficult, unreliable, and
+    not worth the trouble of supporting through these Bazel rules.
 
     Args:
-        type: The type of patch, e.g. "unified", "context", or "default"
-        files: The input files
+        type: The type of patch, e.g. "unified", "context", or "normal"
+        files: The ordered list of input files to the diff command
         from_file: Whether --from-file was passed as an argument to diff
         to_file: Whether --to-file was passed as an argument to diff
         from_or_to_file_path: Path of the --from-file or --to-file file, or None
         newfile: Whether this diff handles new files in a directory (-N, --new-file)
-    Return: True if the diff is patchable
+
+    Return:
+        True if the resulting patch can be applied back to the source tree
     """
-    if from_file:
-        # doesn't make sense for source patching
+    if type == "normal":
+        return False
+
+    if from_file and len(files) > 2:
         return False
     elif to_file:
-        # cannot apply a multifile normal patch since there are no file labels
-        if type == "normal" and len(files) > 2:
-            return False
-
-        # We can't patch multiple directory inputs when --new-file is used.
-        # Patching with --new-file requires running a patch from within the
-        # input directory and removing prefixes, but breaks when there is more
-        # than one input directory being patched.
         if newfile and len(files) > 2:
             return False
-
-        # every other file must be a source file
         for file in files:
             if file.path != from_or_to_file_path and not file.is_source:
                 return False
@@ -203,7 +215,7 @@ def _diff_rule_impl(ctx):
     )
 
     validation_outputs = []
-    patchable = _is_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
+    patchable = _is_source_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
     source_patch_outputs = [ctx.outputs.patch] if patchable else []
 
     if ctx.attr.validate == 1:

@@ -1,0 +1,6 @@
+diff --new-file --normal diff/tests/diff/case_directory_newfile.a/cow.txt diff/tests/diff/case_directory_newfile.b/cow.txt
+0a1
+> moo, moooooo!
+diff --new-file --normal diff/tests/diff/case_directory_newfile.a/file.txt diff/tests/diff/case_directory_newfile.b/file.txt
+1a2
+> goodbye
