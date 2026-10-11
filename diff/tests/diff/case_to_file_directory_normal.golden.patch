@@ -1,0 +1,10 @@
+diff --normal --to-file diff/tests/diff/case_to_file_directory.a diff/tests/diff/case_to_file_directory.b/file diff/tests/diff/case_to_file_directory.a/file
+1c1
+< b
+---
+> a
+diff --normal --to-file diff/tests/diff/case_to_file_directory.a diff/tests/diff/case_to_file_directory.c/file diff/tests/diff/case_to_file_directory.a/file
+1c1
+< c
+---
+> a

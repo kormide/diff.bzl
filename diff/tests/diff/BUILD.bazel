@@ -196,7 +196,30 @@ diff(
 )
 
 diff(
-    name = "case_to_file",
+    name = "case_to_file_normal",
+    srcs = [
+        "case_to_file.a",
+        "case_to_file.b",
+        "case_to_file.c",
+    ],
+    args = [
+        "--normal",
+        "--to-file",
+        "$(execpath case_to_file.a)",
+    ],
+)
+
+diff(
+    name = "case_to_file_normal_assert_patch",
+    srcs = [
+        "case_to_file_normal.golden.patch",
+        ":case_to_file_normal",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_to_file_unified",
     srcs = [
         "case_to_file.a",
         "case_to_file.b",
@@ -210,16 +233,39 @@ diff(
 )
 
 diff(
-    name = "case_to_file_assert_patch",
+    name = "case_to_file_unified_assert_patch",
     srcs = [
-        "case_to_file.golden.patch",
-        ":case_to_file",
+        "case_to_file_unified.golden.patch",
+        ":case_to_file_unified",
     ],
     validate = 1,
 )
 
 diff(
-    name = "case_to_file_directory",
+    name = "case_to_file_directory_normal",
+    srcs = [
+        "case_to_file_directory.a",
+        "case_to_file_directory.b",
+        "case_to_file_directory.c",
+    ],
+    args = [
+        "--normal",
+        "--to-file",
+        "$(execpath case_to_file_directory.a)",
+    ],
+)
+
+diff(
+    name = "case_to_file_directory_normal_assert_patch",
+    srcs = [
+        "case_to_file_directory_normal.golden.patch",
+        ":case_to_file_directory_normal",
+    ],
+    validate = 1,
+)
+
+diff(
+    name = "case_to_file_directory_unified",
     srcs = [
         "case_to_file_directory.a",
         "case_to_file_directory.b",
@@ -233,10 +279,10 @@ diff(
 )
 
 diff(
-    name = "case_to_file_directory_assert_patch",
+    name = "case_to_file_directory_unified_assert_patch",
     srcs = [
-        "case_to_file_directory.golden.patch",
-        ":case_to_file_directory",
+        "case_to_file_directory_unified.golden.patch",
+        ":case_to_file_directory_unified",
     ],
     validate = 1,
 )
@@ -338,10 +384,14 @@ build_test(
         ":case_directory_empty_dirs",
         ":case_from_file",
         ":case_from_file_assert_patch",
-        ":case_to_file",
-        ":case_to_file_assert_patch",
-        ":case_to_file_directory",
-        ":case_to_file_directory_assert_patch",
+        ":case_to_file_normal",
+        ":case_to_file_normal_assert_patch",
+        ":case_to_file_unified",
+        ":case_to_file_unified_assert_patch",
+        ":case_to_file_directory_normal",
+        ":case_to_file_directory_normal_assert_patch",
+        ":case_to_file_directory_unified",
+        ":case_to_file_directory_unified_assert_patch",
         ":case_to_file_directory_newfile",
         ":case_to_file_directory_newfile_assert_patch",
         ":case_source_patch_default_output_group",
