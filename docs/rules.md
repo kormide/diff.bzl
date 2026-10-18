@@ -1,13 +1,13 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-Public diff.bzl API re-exports
+Re-export for syntax sugar load
 
 <a id="cmp"></a>
 
 ## cmp
 
 <pre>
-load("@diff.bzl//diff:defs.bzl", "cmp")
+load("@diff.bzl", "cmp")
 
 cmp(<a href="#cmp-name">name</a>, <a href="#cmp-srcs">srcs</a>, <a href="#cmp-args">args</a>, <a href="#cmp-out">out</a>, <a href="#cmp-kwargs">**kwargs</a>)
 </pre>
@@ -57,7 +57,7 @@ genrule(
 ## diff
 
 <pre>
-load("@diff.bzl//diff:defs.bzl", "diff")
+load("@diff.bzl", "diff")
 
 diff(<a href="#diff-name">name</a>, <a href="#diff-srcs">srcs</a>, <a href="#diff-args">args</a>, <a href="#diff-patch">patch</a>, <a href="#diff-source_patch_output_groups">source_patch_output_groups</a>, <a href="#diff-kwargs">**kwargs</a>)
 </pre>
@@ -121,7 +121,7 @@ to `args`. If overriding arguments, --unified must be added explicitly._
 ## diff3
 
 <pre>
-load("@diff.bzl//diff:defs.bzl", "diff3")
+load("@diff.bzl", "diff3")
 
 diff3(<a href="#diff3-name">name</a>, <a href="#diff3-srcs">srcs</a>, <a href="#diff3-args">args</a>, <a href="#diff3-out">out</a>, <a href="#diff3-kwargs">**kwargs</a>)
 </pre>
@@ -181,7 +181,7 @@ genrule(
 ## sdiff
 
 <pre>
-load("@diff.bzl//diff:defs.bzl", "sdiff")
+load("@diff.bzl", "sdiff")
 
 sdiff(<a href="#sdiff-name">name</a>, <a href="#sdiff-srcs">srcs</a>, <a href="#sdiff-args">args</a>, <a href="#sdiff-out">out</a>, <a href="#sdiff-kwargs">**kwargs</a>)
 </pre>

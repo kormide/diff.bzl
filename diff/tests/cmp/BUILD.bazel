@@ -1,7 +1,8 @@
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//diff:defs.bzl", "cmp", "diff")
+load("//diff:cmp.bzl", "cmp")
+load("//diff:diff.bzl", "diff")
 
 cmp(
     name = "case_cmp_same_binary",

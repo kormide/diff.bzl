@@ -4,7 +4,6 @@ load("//diff/private:options.bzl", "diff_options")
 
 exports_files(
     [
-        "defs.bzl",
         "extensions.bzl",
     ],
     visibility = ["//docs:__pkg__"],
@@ -33,13 +32,40 @@ diff_options(
 )
 
 bzl_library(
-    name = "defs",
-    srcs = ["defs.bzl"],
+    name = "cmp",
+    srcs = ["cmp.bzl"],
     visibility = ["//visibility:public"],
     deps = [
         "//diff/private:cmp",
+        "@bazel_skylib//lib:partial",
+    ],
+)
+
+bzl_library(
+    name = "diff",
+    srcs = ["diff.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
         "//diff/private:diff",
+        "@bazel_skylib//lib:partial",
+    ],
+)
+
+bzl_library(
+    name = "diff3",
+    srcs = ["diff3.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
         "//diff/private:diff3",
+        "@bazel_skylib//lib:partial",
+    ],
+)
+
+bzl_library(
+    name = "sdiff",
+    srcs = ["sdiff.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
         "//diff/private:sdiff",
         "@bazel_skylib//lib:partial",
     ],

@@ -1,3 +1,4 @@
+load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 load("@package_metadata//licenses/rules:license.bzl", "license")
 load("@package_metadata//purl:purl.bzl", "purl")
 load("@package_metadata//rules:package_metadata.bzl", "package_metadata")
@@ -9,6 +10,26 @@ package_metadata(
         module_version(),
     ),
     visibility = ["//visibility:public"],
+)
+
+exports_files(
+    [
+        "diff.bzl",
+    ],
+    visibility = ["//docs:__pkg__"],
+)
+
+bzl_library(
+    name = "diff",
+    srcs = ["diff.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//diff",
+        "//diff:cmp",
+        "//diff:diff3",
+        "//diff:sdiff",
+        "@bazel_skylib//lib:partial",
+    ],
 )
 
 license(
