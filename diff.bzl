@@ -1,6 +1,9 @@
 "Re-export for syntax sugar load"
 
-load("//diff:defs.bzl", _cmp = "cmp", _diff = "diff", _diff3 = "diff3", _sdiff = "sdiff")
+load("//diff:cmp.bzl", _cmp = "cmp")
+load("//diff:diff.bzl", _diff = "diff")
+load("//diff:diff3.bzl", _diff3 = "diff3")
+load("//diff:sdiff.bzl", _sdiff = "sdiff")
 
 cmp = _cmp
 diff = _diff

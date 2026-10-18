@@ -1,10 +1,10 @@
 load("@stardoc//stardoc:stardoc.bzl", "stardoc")
-load("//diff:defs.bzl", "diff")
+load("//diff:diff.bzl", "diff")
 
 stardoc(
     name = "rules_doc",
     out = "rules.md.out",
-    input = "//diff:defs.bzl",
+    input = "//:diff.bzl",
     symbol_names = [
         "cmp",
         "diff",
@@ -12,7 +12,7 @@ stardoc(
         "sdiff",
     ],
     visibility = ["//docs:__pkg__"],
-    deps = ["//diff:defs"],
+    deps = ["//:diff"],
 )
 
 diff(

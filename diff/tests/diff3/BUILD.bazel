@@ -1,7 +1,8 @@
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//diff:defs.bzl", "diff", "diff3")
+load("//diff:diff.bzl", "diff")
+load("//diff:diff3.bzl", "diff3")
 
 diff3(
     name = "case_diff3",
