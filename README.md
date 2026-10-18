@@ -5,7 +5,10 @@
 
 [GNU diffutils](https://www.gnu.org/software/diffutils/) provides `diff`, `cmp`, `diff3`, and `sdiff`.
 
-This project provides rules that run these programs as Bazel actions.
+This project provides:
+
+1. Rules that run diffutils programs as Bazel actions.
+1. Macros for keeping generated source files up to date.
 
 By default, the project registers toolchains for [prebuilt binaries](https://github.com/kormide/diffutils-prebuilt) as diffutils only does source releases. You may alternatively register your own toolchain based on a source build of the diffutils BCR entry (see [example](./e2e/diffutils_from_source)).
 
@@ -69,33 +72,31 @@ sdiff(
 
 ### Keep generated sources up to date
 
-Pass `validate = 1` to `cmp` or `diff` to create a build validation error when a generated source input diverges from the output tree file.
+Use the `sync_source_file` macro to keep a generated file in the source tree in sync with its origin.
 
 ```starlark
-load("@diff.bzl", "diff")
+load("@diff.bzl", "sync_source_file")
 
-diff(
+sync_source_file(
     name = "foo",
-    srcs = [
-      "foo.pb.go",
-      ":foo_generated",
-    ],
-    validate = 1
+    out = "foo.txt",
+    origin = ":generated_foo",
 )
 ```
 
-An error message with command to run to patch the file will be output.
+The macro creates a patch with `diff`, validates it, and outputs an executable target to run to update the source tree file or directory.
 
 ```
-ERROR: diff command exited with non-zero status.
+Source file foo.txt is out of sync with its origin.
 
-To accept the diff, run:
-(cd $(bazel info workspace); patch -p0 < bazel-out/k8-fastbuild/bin/foo.patch)
+To update, run:
+
+bazel run //:foo --norun_validations
 ```
 
-This also works for directories.
+By default, updates are done via the `patch` tool. Alternatively, the source copy can be overwritten by setting `mode = "copy"`.
 
-### Support automatic patch workflows
+### Support automated patch workflows
 
 This ruleset outputs patches for source tree files into the `diff_bzl__patch` output group by default, making it easier to collect and apply patches in an automated fashion. See the [build & patch](./examples/build-and-patch.sh) example script.
 
@@ -104,11 +105,8 @@ The output groups for source patches can be customized via the `source_patch_out
 ```starlark
 diff(
     name = "foo",
-    srcs = [
-      "foo.pb.go",
-      ":foo_generated",
-    ],
-    validate = 1,
+    in_file = ":foo_generated",
+    out_file = "foo.pb.go",
     source_patch_output_groups = ["autopatch"],
 )
 ```

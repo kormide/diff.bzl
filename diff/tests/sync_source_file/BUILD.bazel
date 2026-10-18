@@ -1,0 +1,64 @@
+load("@bazel_skylib//lib:partial.bzl", "partial")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//diff:sync_source_file.bzl", "sync_source_file")
+
+sync_source_file(
+    name = "case_sync_file",
+    out = "case_sync_file.txt",
+    origin = partial.make(
+        write_file,
+        content = [
+            "foobar",
+            "",
+        ],
+    ),
+)
+
+sync_source_file(
+    name = "case_sync_file_from_external_workspace",
+    out = "case_sync_file_from_external_workspace.txt",
+    origin = "@external_workspace//:file.txt",
+)
+
+sync_source_file(
+    name = "case_sync_file_in_subfolder",
+    out = "case_sync_file_in_subfolder/file.txt",
+    origin = partial.make(
+        write_file,
+        content = [
+            "foobar",
+            "",
+        ],
+    ),
+)
+
+sync_source_file(
+    name = "case_sync_file_copy",
+    out = "case_sync_file_copy.txt",
+    mode = "copy",
+    origin = partial.make(
+        write_file,
+        content = [
+            "foobar",
+            "",
+        ],
+    ),
+)
+
+sync_source_file(
+    name = "case_sync_directory",
+    out = "case_sync_directory_a",
+    origin = "case_sync_directory_b",
+)
+
+sync_source_file(
+    name = "case_sync_directory_subdirs",
+    out = "case_sync_directory_subdirs_a",
+    origin = "case_sync_directory_subdirs_b",
+)
+
+sync_source_file(
+    name = "case_sync_directory_from_external_workspace",
+    out = "case_sync_directory_from_external_workspace_dir",
+    origin = "@external_workspace//:directory",
+)

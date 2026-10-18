@@ -28,7 +28,7 @@ bzl_library(
         "//diff:cmp",
         "//diff:diff3",
         "//diff:sdiff",
-        "@bazel_skylib//lib:partial",
+        "//diff:sync_source_file",
     ],
 )
 

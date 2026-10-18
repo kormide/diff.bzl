@@ -225,3 +225,43 @@ genrule(
 | <a id="sdiff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule.   |  none |
 
 
+<a id="sync_source_file"></a>
+
+## sync_source_file
+
+<pre>
+load("@diff.bzl", "sync_source_file")
+
+sync_source_file(<a href="#sync_source_file-name">name</a>, <a href="#sync_source_file-origin">origin</a>, <a href="#sync_source_file-out">out</a>, <a href="#sync_source_file-mode">mode</a>, <a href="#sync_source_file-source_patch_output_groups">source_patch_output_groups</a>)
+</pre>
+
+Synchronize a source tree file or directory (`out`) with the contents with another file or directory (the `origin`).
+
+Generates a patch using `diff` from the `origin` file to the `out` file with
+validation enabled, and creates an executable "sync" target to update the `out`
+file in the source tree.
+
+If the `out` file does not exist, or if it differs from `origin`,
+then a failure message will appear describing the executable target to run
+to materialize or patch it in the source tree.
+
+Failures occur early—in the analysis phase if the file does not exist,
+or at build time as a failed validation action—rather than at test time.
+
+Synchronization is done by applying a patch to the `out` file
+(mode = "patch", the default), or by copying over it with `origin`'s contents
+(mode = "copy").
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="sync_source_file-name"></a>name |  Name of the executable target to update the `out` file in the source tree   |  none |
+| <a id="sync_source_file-origin"></a>origin |  Label to the file or directory containing the desired state (what `out` should match)   |  none |
+| <a id="sync_source_file-out"></a>out |  Label to the source tree file or directory to synchronize.   |  none |
+| <a id="sync_source_file-mode"></a>mode |  The synchronization mode, "patch" (default) to apply a patch, or "copy" to copy over the `out` file.   |  `"patch"` |
+| <a id="sync_source_file-source_patch_output_groups"></a>source_patch_output_groups |  Additional output groups to add the source file patch to   |  `["diff_bzl__patch"]` |
+
+

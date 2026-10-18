@@ -1,0 +1,7 @@
+exports_files(
+    [
+        "directory",
+        "file.txt",
+    ],
+    visibility = ["//visibility:public"],
+)

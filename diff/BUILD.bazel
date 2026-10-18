@@ -59,6 +59,20 @@ bzl_library(
 )
 
 bzl_library(
+    name = "sync_source_file",
+    srcs = ["sync_source_file.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":diff",
+        "//diff/private:fail_analysis_test",
+        "//diff/private:patch_source_file",
+        "//diff/private:write_source_file",
+        "@bazel_lib//lib:utils",
+        "@bazel_skylib//lib:partial",
+    ],
+)
+
+bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
     visibility = ["//visibility:public"],
