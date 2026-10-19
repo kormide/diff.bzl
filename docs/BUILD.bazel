@@ -1,5 +1,5 @@
 load("@stardoc//stardoc:stardoc.bzl", "stardoc")
-load("//diff:diff.bzl", "diff")
+load("//diff:sync_source_file.bzl", "sync_source_file")
 
 stardoc(
     name = "rules_doc",
@@ -10,19 +10,16 @@ stardoc(
         "diff",
         "diff3",
         "sdiff",
+        "sync_source_file",
     ],
     visibility = ["//docs:__pkg__"],
     deps = ["//:diff"],
 )
 
-diff(
+sync_source_file(
     name = "rules",
-    srcs = [
-        "rules.md",
-        ":rules_doc",
-    ],
-    args = ["--unified"],
-    validate = 1,
+    out = "rules.md",
+    origin = ":rules_doc",
 )
 
 stardoc(
@@ -33,12 +30,8 @@ stardoc(
     deps = ["//diff:extensions"],
 )
 
-diff(
+sync_source_file(
     name = "extensions",
-    srcs = [
-        "extensions.md",
-        ":extensions_doc",
-    ],
-    args = ["--unified"],
-    validate = 1,
+    out = "extensions.md",
+    origin = ":extensions_doc",
 )

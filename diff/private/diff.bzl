@@ -4,6 +4,15 @@ load("@bazel_lib//lib:expand_make_vars.bzl", "expand_locations")
 
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
+DiffInfo = provider(
+    "Information about a diff rule invocation",
+    fields = {
+        "patch": "Patch file output by `diff`",
+        "source_patch_args": "Recommended arguments to the `patch` tool to use when applying this patch to the source tree, or None if not source-patchable",
+        "source_patchable": "Whether this patch can be applied to a file in the source tree",
+    },
+)
+
 def _validate(ctx, error_message):
     diff_valid_file = ctx.actions.declare_file(ctx.outputs.patch.path + ".valid")
     ctx.actions.run_shell(
@@ -41,15 +50,16 @@ def _is_newfile(args):
             return True
     return False
 
-def _patch_cmd(type, source_file, patch_file, newfile):
+def _get_source_patch_args(type, source_file, newfile):
+    args = None
     if type == "normal":
-        return "(cd \\$(bazel info workspace); patch -p0 {} < {})".format(source_file, patch_file)
+        args = ["-p0", source_file.path]
     elif type == "context" or type == "unified":
         if newfile:
-            return "(cd \\$(bazel info workspace); patch --directory {} -p{} < {})".format(source_file, source_file.count("/") + 1, patch_file)
+            args = ["--directory", "-p{}".format(source_file.path, source_file.path.count("/") + 1)]
         else:
-            return "(cd \\$(bazel info workspace); patch -p0 < {})".format(patch_file)
-    return None
+            args = ["-p0"]
+    return args
 
 def _detect_multifile(args):
     from_file = False
@@ -214,24 +224,27 @@ def _diff_rule_impl(ctx):
     )
 
     validation_outputs = []
-    patchable = _is_source_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
-    source_patch_outputs = [ctx.outputs.patch] if patchable else []
+    source_patchable = _is_source_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
+    source_patch_outputs = [ctx.outputs.patch] if source_patchable else []
 
+    source_patch_args = None
     if ctx.attr.validate:
         patch_msg = ""
-        if patchable:
+        if source_patchable:
             # Show a command to patch the source file if it's a (bazel) source file.
             # NB: the error message we print here allows the user to be in any working directory.
-            patch_cmd = _patch_cmd(type, ctx.files.srcs[0].path, ctx.outputs.patch.path, newfile)
-            if patch_cmd != None:
+            source_patch_args = _get_source_patch_args(type, ctx.files.srcs[0], newfile)
+            if source_patch_args != None:
+                patch_cmd = "(cd \\$(bazel info workspace); patch {})".format(" ".join(source_patch_args))
                 patch_msg = """
     To accept the diff, run:
-    {}
-                """.format(patch_cmd)
+    {} < {}
+                """.format(patch_cmd, ctx.outputs.patch.path)
 
-        validation_outputs.append(_validate(ctx, """\
+        validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
     ERROR: diff command exited with non-zero status.
-    {}""".format(patch_msg)))
+    {}""".format(patch_msg, foo = "bar")
+        validation_outputs.append(_validate(ctx, validation_error_msg))
 
     source_patches_depset = depset(source_patch_outputs)
 
@@ -242,6 +255,11 @@ def _diff_rule_impl(ctx):
         OutputGroupInfo(
             _validation = depset(validation_outputs),
             **source_patch_output_groups
+        ),
+        DiffInfo(
+            patch = ctx.outputs.patch,
+            source_patch_args = source_patch_args,
+            source_patchable = source_patchable,
         ),
     ]
 
@@ -275,6 +293,9 @@ diff_rule = rule(
               An individual Bazel invocation can run with --norun_validations to skip this behavior.
             """,
             default = False,
+        ),
+        "validation_error_msg": attr.string(
+            doc = "Override the message output to the stdout of the failing validation action when the files differ",
         ),
     },
     toolchains = [DIFFUTILS_TOOLCHAIN_TYPE],
