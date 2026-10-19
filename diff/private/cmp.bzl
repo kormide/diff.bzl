@@ -1,7 +1,5 @@
 """Implements the cmp rule."""
 
-load("//diff/private:options.bzl", "DiffOptionsInfo")
-
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
 def _validate(ctx, error_message):
@@ -53,14 +51,7 @@ fi
 
     validation_outputs = []
 
-    if ctx.attr.validate == 1:
-        validate = True
-    elif ctx.attr.validate == 0:
-        validate = False
-    else:
-        validate = ctx.attr._options[DiffOptionsInfo].validate
-
-    if validate:
+    if ctx.attr.validate:
         # Show a command to replace the first file if it's a source file.
         # NB: the error message we print here allows the user to be in any working directory.
         msg = """
@@ -95,20 +86,14 @@ cmp_rule = rule(
             """,
             mandatory = True,
         ),
-        "validate": attr.int(
+        "validate": attr.bool(
             doc = """\
               Whether to treat non-empty cmp output (exit 1) as a build validation failure.
 
-              -1: default to the flag value --@diff.bzl//diff:validate_cmps
-               0: never validate
-               1: always validate
-
               An individual Bazel invocation can run with --norun_validations to skip this behavior.
             """,
-            default = -1,
-            values = [-1, 0, 1],
+            default = False,
         ),
-        "_options": attr.label(default = "//diff:diff_options"),
     },
     toolchains = [DIFFUTILS_TOOLCHAIN_TYPE],
 )

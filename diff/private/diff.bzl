@@ -1,7 +1,6 @@
 """Implements the diff rule."""
 
 load("@bazel_lib//lib:expand_make_vars.bzl", "expand_locations")
-load("//diff/private:options.bzl", "DiffOptionsInfo")
 
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
@@ -218,14 +217,7 @@ def _diff_rule_impl(ctx):
     patchable = _is_source_patchable(type, ctx.files.srcs, from_file, to_file, from_or_to_file_path, newfile)
     source_patch_outputs = [ctx.outputs.patch] if patchable else []
 
-    if ctx.attr.validate == 1:
-        validate = True
-    elif ctx.attr.validate == 0:
-        validate = False
-    else:
-        validate = ctx.attr._options[DiffOptionsInfo].validate
-
-    if validate:
+    if ctx.attr.validate:
         patch_msg = ""
         if patchable:
             # Show a command to patch the source file if it's a (bazel) source file.
@@ -276,20 +268,14 @@ diff_rule = rule(
             """,
             mandatory = True,
         ),
-        "validate": attr.int(
+        "validate": attr.bool(
             doc = """\
               Whether to treat a non-empty diff (exit 1) as a build validation failure.
 
-              -1: default to the flag value --@diff.bzl//diff:validate_diffs
-               0: never validate
-               1: always validate
-
               An individual Bazel invocation can run with --norun_validations to skip this behavior.
             """,
-            default = -1,
-            values = [-1, 0, 1],
+            default = False,
         ),
-        "_options": attr.label(default = "//diff:diff_options"),
     },
     toolchains = [DIFFUTILS_TOOLCHAIN_TYPE],
 )

@@ -23,7 +23,6 @@ jobs:
           - .
           - e2e/diffutils_from_source
           - e2e/smoke
-          - e2e/validate_override
     defaults:
       run:
         working-directory: ${{ matrix.folder }}

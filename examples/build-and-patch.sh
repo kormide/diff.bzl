@@ -18,7 +18,6 @@ args=(
     "--output_groups=diff_bzl__patch"
 	"--build_event_json_file=$buildevents"
 	"--remote_download_regex='.*\.patch'"
-	"--@diff.bzl//diff:validate"
 )
 
 # Run build with validation enabled and output group for patches.
