@@ -95,8 +95,6 @@ To accept the diff, run:
 
 This also works for directories.
 
-To validate all `diff`, `cmp`, etc. actions by default, set `common --@diff.bzl//diff:validate=true` in your bazelrc.
-
 ### Support automatic patch workflows
 
 This ruleset outputs patches for source tree files into the `diff_bzl__patch` output group by default, making it easier to collect and apply patches in an automated fashion. See the [build & patch](./examples/build-and-patch.sh) example script.

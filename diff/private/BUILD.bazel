@@ -4,7 +4,6 @@ bzl_library(
     name = "cmp",
     srcs = [
         "cmp.bzl",
-        "options.bzl",
     ],
     visibility = ["//diff:__subpackages__"],
 )
@@ -13,7 +12,6 @@ bzl_library(
     name = "diff",
     srcs = [
         "diff.bzl",
-        "options.bzl",
     ],
     visibility = ["//diff:__subpackages__"],
     deps = [
