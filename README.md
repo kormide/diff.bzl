@@ -96,6 +96,8 @@ bazel run //:foo --norun_validations
 
 By default, updates are done via the `patch` tool. Alternatively, the source copy can be overwritten by setting `mode = "copy"`.
 
+To keep binary files in sync, use [sync_source_bin](./docs/rules.md#sync_source_bin).
+
 ### Support automated patch workflows
 
 This ruleset outputs patches for source tree files into the `diff_bzl__patch` output group by default, making it easier to collect and apply patches in an automated fashion. See the [build & patch](./examples/build-and-patch.sh) example script.

@@ -225,6 +225,38 @@ genrule(
 | <a id="sdiff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule.   |  none |
 
 
+<a id="sync_source_bin"></a>
+
+## sync_source_bin
+
+<pre>
+load("@diff.bzl", "sync_source_bin")
+
+sync_source_bin(<a href="#sync_source_bin-name">name</a>, <a href="#sync_source_bin-origin">origin</a>, <a href="#sync_source_bin-out">out</a>)
+</pre>
+
+Synchronize a vendored source tree binary with another binary.
+
+Compares the binaries using `cmp` with validation enabled, and creates an executable "sync" target to update the `out` binary in the source tree.
+
+If the `out` binary does not exist, or if it differs from `origin`,
+then a failure message will appear describing the executable target to run
+to materialize it in the source tree.
+
+Failures occur early—in the analysis phase if the binary does not exist,
+or at build time as a failed validation action—rather than at test time.
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="sync_source_bin-name"></a>name |  Name of the executable target to update the `out` binary in the source tree   |  none |
+| <a id="sync_source_bin-origin"></a>origin |  Label to the binary containing the desired state (what `out` should match)   |  none |
+| <a id="sync_source_bin-out"></a>out |  Label to the source tree binary to synchronize.   |  none |
+
+
 <a id="sync_source_file"></a>
 
 ## sync_source_file
