@@ -54,14 +54,19 @@ fi
     if ctx.attr.validate:
         # Show a command to replace the first file if it's a source file.
         # NB: the error message we print here allows the user to be in any working directory.
-        msg = """
-        To replace {file1}, run:
-        (cd \\$(bazel info workspace); cp {file2} {file1})
-        """.format(file1 = ctx.files.srcs[0].path, file2 = ctx.files.srcs[1].path) if ctx.files.srcs[0].is_source else ""
+        replace_msg = ""
+        if ctx.files.srcs[0].is_source:
+            replace_msg = """
+To replace {file1}, run:
 
-        validation_outputs.append(_validate(ctx, """\
-        ERROR: cmp command exited with non-zero status.
-        {msg}""".format(msg = msg)))
+(cd \\$(bazel info workspace); cp {file2} {file1})""".format(file1 = ctx.files.srcs[0].path, file2 = ctx.files.srcs[1].path)
+
+        validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
+ERROR: cmp command exited with non-zero status.
+{}
+""".format(replace_msg)
+
+        validation_outputs.append(_validate(ctx, validation_error_msg))
 
     return [
         DefaultInfo(files = depset(outputs)),
@@ -93,6 +98,9 @@ cmp_rule = rule(
               An individual Bazel invocation can run with --norun_validations to skip this behavior.
             """,
             default = False,
+        ),
+        "validation_error_msg": attr.string(
+            doc = "Override the message output to the stdout of the failing validation action when the files differ",
         ),
     },
     toolchains = [DIFFUTILS_TOOLCHAIN_TYPE],

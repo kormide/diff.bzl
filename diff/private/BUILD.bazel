@@ -68,6 +68,14 @@ bzl_library(
 )
 
 bzl_library(
+    name = "utils",
+    srcs = [
+        "utils.bzl",
+    ],
+    visibility = ["//diff:__subpackages__"],
+)
+
+bzl_library(
     name = "versions",
     srcs = [
         "versions.bzl",

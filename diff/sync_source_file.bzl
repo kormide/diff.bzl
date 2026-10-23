@@ -4,27 +4,9 @@ load("@bazel_lib//lib:utils.bzl", "is_external_label", "to_label")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("//diff/private:fail_analysis_test.bzl", "fail_analysis_test")
 load("//diff/private:patch_source_file.bzl", _patch_source_file = "patch_source_file")
+load("//diff/private:utils.bzl", "source_file_info")
 load("//diff/private:write_source_file.bzl", _write_source_file = "write_source_file")
 load(":diff.bzl", "diff")
-
-def _source_file_info(source_label):
-    """Determine whether a file exists in the source tree and is a directory
-
-    Args:
-        source_label: Label of source file within the current package
-
-    Returns:
-        A boolean pair tuple (exists, is_directory) indicating the file's existence
-        and whether it's a directory
-
-    """
-    all = native.glob([source_label.name], allow_empty = True, exclude_directories = 0)
-    files_only = native.glob([source_label.name], allow_empty = True)
-
-    exists = len(all) > 0
-    is_directory = exists and not files_only
-
-    return (exists, is_directory)
 
 def sync_source_file(name, origin, out, mode = "patch", source_patch_output_groups = ["diff_bzl__patch"]):
     """Synchronize a source tree file or directory (`out`) with the contents with another file or directory (the `origin`).
@@ -69,7 +51,7 @@ Error: sync_source_file declares an `out` file that is not in the same package a
 """.format(out, native.repo_name(), native.package_name()))
 
     out_file_path = "{}/{}".format(out_label.package, out_label.name)
-    (exists, is_directory) = _source_file_info(out_label)
+    (exists, is_directory) = source_file_info(out_label)
     if not exists:
         # Mint a test that will always fail during the analysis phase if the source tree
         # file does not exist. This is preferable to failing during the loading phase

@@ -1,0 +1,7 @@
+load("//diff:sync_source_bin.bzl", "sync_source_bin")
+
+sync_source_bin(
+    name = "case_sync_bin",
+    out = "case_sync_bin.b",
+    origin = "case_sync_bin.a",
+)

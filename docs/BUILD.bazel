@@ -10,6 +10,7 @@ stardoc(
         "diff",
         "diff3",
         "sdiff",
+        "sync_source_bin",
         "sync_source_file",
     ],
     visibility = ["//docs:__pkg__"],
