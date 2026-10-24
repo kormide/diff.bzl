@@ -7,19 +7,34 @@ if [[ -z "${BUILD_WORKSPACE_DIRECTORY:-}" ]]; then
    exit 2
 fi
 
-src_path=$(realpath "{{SRC}}")
-cd "${BUILD_WORKSPACE_DIRECTORY}"
+srcs=( {{SRCS}} )
+dsts=( {{DSTS}} )
 
-echo "Writing source file"
-echo "From: {{SRC}}"
-echo "To: {{DST}}"
-
-mkdir -p "$(dirname "{{DST}}")"
-
-# Create the file with default and without the executable bit,
-# instead of inheriting these from the Bazel output tree.
-if [[ -f "${src_path}" ]]; then
-    touch "{{DST}}"
+if (( ${#srcs[@]} != ${#dsts[@]} )); then
+   echo "The number of sources (${#srcs[@]}) differs from the number of destinations (${#dsts[@]})" >&2
+   exit 2
 fi
 
-cp -r "${src_path}" "{{DST}}"
+for i in "${!srcs[@]}"; do
+    srcs[$i]="$(realpath "${srcs[$i]}")"
+done
+
+cd "${BUILD_WORKSPACE_DIRECTORY}"
+
+echo "Writing ${#srcs[@]} source file(s)"
+
+for i in "${!srcs[@]}"; do
+    src="${srcs[$i]}"
+    dst="${dsts[$i]}"
+
+    echo "Copying ${src} to ${dst}"
+    mkdir -p "$(dirname "${dst}")"
+
+    # Create the file with default and without the executable bit,
+    # instead of inheriting these from the Bazel output tree.
+    if [[ -f "${src}" ]]; then
+        touch "{{dst}}"
+    fi
+
+    cp -r "${src}" "${dst}"
+done

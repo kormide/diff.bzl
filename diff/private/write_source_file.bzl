@@ -7,31 +7,31 @@ def _write_source_file_impl(ctx):
         output = executable,
         is_executable = True,
         substitutions = {
-            "{{SRC}}": ctx.file.src.short_path,
-            "{{DST}}": ctx.attr.dst,
+            "{{SRCS}}": " ".join(["\"{}\"".format(src.short_path) for src in ctx.files.srcs]),
+            "{{DSTS}}": " ".join(["\"{}\"".format(dst) for dst in ctx.attr.dsts]),
         },
     )
 
     return DefaultInfo(
         executable = executable,
-        default_runfiles = ctx.runfiles(files = [ctx.file.src]),
+        default_runfiles = ctx.runfiles(files = ctx.files.srcs),
     )
 
 write_source_file = rule(
     implementation = _write_source_file_impl,
-    doc = "Overwrite a file or directory in the source tree with the contents of another file or directory",
+    doc = "Overwrite files or directories in the source tree with the contents of other files or directories",
     attrs = {
-        "src": attr.label(
+        "srcs": attr.label_list(
             mandatory = True,
-            doc = "File or directory containing the desired contents",
-            allow_single_file = True,
+            doc = "Files or directories to copy from",
+            allow_files = True,
         ),
-        "dst": attr.string(
+        "dsts": attr.string_list(
             mandatory = True,
-            doc = "Destination file or directory to write to",
+            doc = "Files or directories to copy to",
         ),
         "_write_template": attr.label(
-            doc = "Template Bash script used to copy the file or directory",
+            doc = "Template Bash script used to perform the copying",
             cfg = "exec",
             allow_single_file = True,
             default = "//diff/private:write_source_file.sh.tpl",

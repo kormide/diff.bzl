@@ -73,6 +73,6 @@ bazel run //{}:{} --norun_validations
 
     _write_source_file(
         name = name,
-        src = origin,
-        dst = "{}/{}".format(native.package_name(), Label(out).name),
+        srcs = [origin],
+        dsts = ["{}/{}".format(native.package_name(), Label(out).name)],
     )
