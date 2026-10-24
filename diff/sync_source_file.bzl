@@ -2,13 +2,35 @@
 
 load("@bazel_lib//lib:utils.bzl", "is_external_label", "to_label")
 load("@bazel_skylib//lib:partial.bzl", "partial")
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("//diff/private:fail_analysis_test.bzl", "fail_analysis_test")
 load("//diff/private:patch_source_file.bzl", _patch_source_file = "patch_source_file")
 load("//diff/private:utils.bzl", "source_file_info")
 load("//diff/private:write_source_file.bzl", _write_source_file = "write_source_file")
 load(":diff.bzl", "diff")
 
-def sync_source_file(name, origin, out, mode = "patch", source_patch_output_groups = ["diff_bzl__patch"]):
+def _fix_message(source_file_path, preview_target, update_target):
+    msg = """\
+Source file {} is out of sync with its origin.
+{{}}
+""".format(source_file_path)
+    if preview_target:
+        msg = msg.format("""\
+
+To preview the differences, run:
+
+bazel run {}
+{{}}""".format(preview_target))
+
+    msg = msg.format("""\
+
+To update, run:
+
+bazel run {} --norun_validations """.format(update_target))
+
+    return msg
+
+def sync_source_file(name, origin, out, mode = "patch", source_patch_output_groups = ["diff_bzl__patch"], preview_target = "@diff.bzl//diff:default_preview", preview_target_additional_args = [], validate = True):
     """Synchronize a source tree file or directory (`out`) with the contents with another file or directory (the `origin`).
 
     Generates a patch using `diff` from the `origin` file to the `out` file with
@@ -29,10 +51,17 @@ def sync_source_file(name, origin, out, mode = "patch", source_patch_output_grou
     Args:
         name: Name of the executable target to update the `out` file in the source tree
         origin: Label to the file or directory containing the desired state (what `out` should match)
-        out: Label to the source tree file or directory to synchronize.
+        out: Label to the source tree file or directory to synchronize
         mode: The synchronization mode, "patch" (default) to apply a patch, or
-            "copy" to copy over the `out` file.
+            "copy" to copy over the `out` file
         source_patch_output_groups: Additional output groups to add the source file patch to
+        preview_target: An executable target to run to preview the difference between the two
+            files. The executable will be invoked with the two files as positional arguments.
+            Defaults to a target that runs sdiff.
+        preview_target_additional_args: Additional arguments to pass to the preview executable target
+        validate: Whether to fail the build when the files differ. Setting this to `False` retains
+            the executable preview and update targets but the difference will not be flagged in an
+            error message.
     """
 
     # Allow the origin file to be generated easily for tests using partials.
@@ -88,14 +117,8 @@ bazel run //{}:{} --norun_validations
         patch = "{}.patch".format(name),
         args = diff_args,
         source_patch_output_groups = source_patch_output_groups,
-        validate = 1,
-        validation_error_msg = """\
-Source file {} is out of sync with its origin.
-
-To update, run:
-
-bazel run //{}:{} --norun_validations
-""".format(out_file_path, native.package_name(), name),
+        validate = validate,
+        validation_error_msg = _fix_message(out_file_path, "//{}:{}.preview".format(native.package_name(), name) if preview_target else None, "//{}:{}".format(native.package_name(), name)),
     )
 
     if mode == "patch":
@@ -110,4 +133,12 @@ bazel run //{}:{} --norun_validations
             dst = "{}/{}".format(native.package_name(), out_label.name),
         )
     else:
-        fail("Error: unknown mode \"{}\" passed to sync_source_file".format(mode))
+        fail("Error: unknown mode \"{}\" passed to sync_source_file {}".format(mode))
+
+    if preview_target:
+        native_binary(
+            name = "{}.preview".format(name),
+            src = preview_target,
+            data = [out, origin],
+            args = ["$(rootpath {})".format(out), "$(rootpath {})".format(origin)] + preview_target_additional_args,
+        )

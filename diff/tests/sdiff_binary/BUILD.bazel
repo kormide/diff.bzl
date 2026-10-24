@@ -1,0 +1,35 @@
+load("//diff:sdiff_binary.bzl", "sdiff_binary")
+
+sdiff_binary(
+    name = "case_help",
+    args = ["--help"],
+)
+
+sdiff_binary(
+    name = "case_file_args",
+    file1 = "case_file_args.1.txt",
+    file2 = "case_file_args.2.txt",
+)
+
+sdiff_binary(
+    name = "case_files_passed_as_args",
+    args = [
+        "$(rootpath case_file_args.1.txt)",
+        "$(rootpath case_file_args.2.txt)",
+    ],
+    data = [
+        "case_file_args.1.txt",
+        "case_file_args.2.txt",
+    ],
+)
+
+sdiff_binary(
+    name = "case_files_partially_passed_as_args",
+    args = [
+        "$(rootpath case_file_args.2.txt)",
+    ],
+    data = [
+        "case_file_args.2.txt",
+    ],
+    file1 = "case_file_args.1.txt",
+)

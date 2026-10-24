@@ -28,6 +28,7 @@ bzl_library(
         "//diff:cmp",
         "//diff:diff3",
         "//diff:sdiff",
+        "//diff:sdiff_binary",
         "//diff:sync_source_bin",
         "//diff:sync_source_file",
     ],

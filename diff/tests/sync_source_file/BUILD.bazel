@@ -1,5 +1,9 @@
+load("@bazel_lib//lib:run_binary.bzl", "run_binary")
 load("@bazel_skylib//lib:partial.bzl", "partial")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("//diff:diff.bzl", "diff")
 load("//diff:sync_source_file.bzl", "sync_source_file")
 
 sync_source_file(
@@ -61,4 +65,108 @@ sync_source_file(
     name = "case_sync_directory_from_external_workspace",
     out = "case_sync_directory_from_external_workspace_dir",
     origin = "@external_workspace//:directory",
+)
+
+sync_source_file(
+    name = "case_sync_file_no_preview",
+    out = "case_sync_file_no_preview.txt",
+    origin = partial.make(
+        write_file,
+        content = [
+            "foobar",
+            "",
+        ],
+    ),
+    preview_target = None,
+)
+
+write_file(
+    name = "custom_preview_script",
+    out = "preview.sh",
+    content = [
+        "#!/usr/bin/env bash",
+        "echo === FIRST ===",
+        "cat $1",
+        "echo === SECOND ===",
+        "cat $2",
+    ],
+    is_executable = True,
+)
+
+sh_binary(
+    name = "custom_preview",
+    srcs = ["preview.sh"],
+)
+
+sync_source_file(
+    name = "case_sync_file_custom_preview_target",
+    out = "case_sync_file_custom_preview_target.txt",
+    origin = partial.make(
+        write_file,
+        content = [
+            "foobar",
+            "",
+        ],
+    ),
+    preview_target = ":custom_preview",
+    # Turn off validation so that we can accept a difference between the files
+    # and generate a useful preview of the difference for testing.
+    validate = False,
+)
+
+# When we run the preview target as a build action, Balel drops the `args` added
+# to the preview target in the sync_source_file macro. Pass the args directly here
+# to simulate what running the target would do.
+run_binary(
+    name = "case_sync_file_custom_preview_target_output",
+    srcs = [
+        "case_sync_file_custom_preview_target.1.in",
+        "case_sync_file_custom_preview_target.txt",
+    ],
+    args = [
+        "$(execpath case_sync_file_custom_preview_target.txt)",
+        "$(execpath case_sync_file_custom_preview_target.1.in)",
+    ],
+    stdout = "case_sync_file_custom_preview_target_output.txt",
+    tool = ":case_sync_file_custom_preview_target.preview",
+)
+
+diff(
+    name = "case_sync_file_custom_preview_target_assert_preview",
+    srcs = [
+        ":case_sync_file_custom_preview_target_output.txt",
+        partial.make(
+            write_file,
+            content = [
+                "=== FIRST ===",
+                "foobar",
+                "moocow",
+                "=== SECOND ===",
+                "foobar",
+                "",
+            ],
+        ),
+    ],
+    validate = True,
+)
+
+sync_source_file(
+    name = "case_no_validate",
+    out = "case_no_validate.txt",
+    origin = partial.make(
+        write_file,
+        content = [
+            "foobar",
+            "",
+        ],
+    ),
+    validate = False,
+)
+
+build_test(
+    name = "build_test",
+    targets = [
+        ":case_no_validate_patch",
+        ":case_sync_file_custom_preview_target_assert_preview",
+    ],
 )
