@@ -19,19 +19,19 @@ def _write_source_file_impl(ctx):
 
 write_source_file = rule(
     implementation = _write_source_file_impl,
-    doc = "Overwrite a file or directory in the source tree with the contents of another file or directory",
+    doc = "Overwrite files or directories in the source tree with the contents of other files or directories",
     attrs = {
-        "src": attr.label(
+        "srcs": attr.label(
             mandatory = True,
-            doc = "File or directory containing the desired contents",
+            doc = "Files or directories to copy from"
             allow_single_file = True,
         ),
-        "dst": attr.string(
+        "dsts": attr.string(
             mandatory = True,
-            doc = "Destination file or directory to write to",
+            doc = "Files or directories to copy to"
         ),
         "_write_template": attr.label(
-            doc = "Template Bash script used to copy the file or directory",
+            doc = "Template Bash script used to perform the copying",
             cfg = "exec",
             allow_single_file = True,
             default = "//diff/private:write_source_file.sh.tpl",
