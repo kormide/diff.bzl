@@ -3,6 +3,7 @@ load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 exports_files(
     [
         "patch_source_file.sh.tpl",
+        "sdiff_binary.sh.tpl",
         "write_source_file.sh.tpl",
     ],
     visibility = ["//visibility:public"],
@@ -55,6 +56,14 @@ bzl_library(
     name = "sdiff",
     srcs = [
         "sdiff.bzl",
+    ],
+    visibility = ["//diff:__subpackages__"],
+)
+
+bzl_library(
+    name = "sdiff_binary",
+    srcs = [
+        "sdiff_binary.bzl",
     ],
     visibility = ["//diff:__subpackages__"],
 )

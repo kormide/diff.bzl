@@ -225,6 +225,57 @@ genrule(
 | <a id="sdiff-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rule.   |  none |
 
 
+<a id="sdiff_binary"></a>
+
+## sdiff_binary
+
+<pre>
+load("@diff.bzl", "sdiff_binary")
+
+sdiff_binary(<a href="#sdiff_binary-name">name</a>, <a href="#sdiff_binary-file1">file1</a>, <a href="#sdiff_binary-file2">file2</a>, <a href="#sdiff_binary-kwargs">**kwargs</a>)
+</pre>
+
+Create a binary that runs a side-by-side diff of two files using sdiff.
+
+Examples:
+
+Run sdiff against two files.
+
+```starlark
+sdiff_binary(
+    name = "compare",
+    file1 = "a.txt",
+    file2 = "b.txt",
+    args = ["--width", "40"],
+)
+```
+
+```bash
+bazel run //:compare
+```
+
+Alternatively, pass in the file arguments via `args`.
+
+```starlark
+sdiff_binary(
+    name = "compare",
+    args = ["$(rootpath a.txt)", "$(rootpath b.txt)"],
+    data = ["a.txt", "b.txt"],
+)
+```
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="sdiff_binary-name"></a>name |  The name of the rule   |  none |
+| <a id="sdiff_binary-file1"></a>file1 |  First file to compare   |  `None` |
+| <a id="sdiff_binary-file2"></a>file2 |  Second file to compare   |  `None` |
+| <a id="sdiff_binary-kwargs"></a>kwargs |  Additional arguments to pass to the underlying binary rule.   |  none |
+
+
 <a id="sync_source_bin"></a>
 
 ## sync_source_bin
@@ -264,7 +315,8 @@ or at build time as a failed validation action—rather than at test time.
 <pre>
 load("@diff.bzl", "sync_source_file")
 
-sync_source_file(<a href="#sync_source_file-name">name</a>, <a href="#sync_source_file-origin">origin</a>, <a href="#sync_source_file-out">out</a>, <a href="#sync_source_file-mode">mode</a>, <a href="#sync_source_file-source_patch_output_groups">source_patch_output_groups</a>)
+sync_source_file(<a href="#sync_source_file-name">name</a>, <a href="#sync_source_file-origin">origin</a>, <a href="#sync_source_file-out">out</a>, <a href="#sync_source_file-mode">mode</a>, <a href="#sync_source_file-source_patch_output_groups">source_patch_output_groups</a>, <a href="#sync_source_file-preview_target">preview_target</a>,
+                 <a href="#sync_source_file-preview_target_additional_args">preview_target_additional_args</a>, <a href="#sync_source_file-validate">validate</a>)
 </pre>
 
 Synchronize a source tree file or directory (`out`) with the contents with another file or directory (the `origin`).
@@ -292,8 +344,11 @@ Synchronization is done by applying a patch to the `out` file
 | :------------- | :------------- | :------------- |
 | <a id="sync_source_file-name"></a>name |  Name of the executable target to update the `out` file in the source tree   |  none |
 | <a id="sync_source_file-origin"></a>origin |  Label to the file or directory containing the desired state (what `out` should match)   |  none |
-| <a id="sync_source_file-out"></a>out |  Label to the source tree file or directory to synchronize.   |  none |
-| <a id="sync_source_file-mode"></a>mode |  The synchronization mode, "patch" (default) to apply a patch, or "copy" to copy over the `out` file.   |  `"patch"` |
+| <a id="sync_source_file-out"></a>out |  Label to the source tree file or directory to synchronize   |  none |
+| <a id="sync_source_file-mode"></a>mode |  The synchronization mode, "patch" (default) to apply a patch, or "copy" to copy over the `out` file   |  `"patch"` |
 | <a id="sync_source_file-source_patch_output_groups"></a>source_patch_output_groups |  Additional output groups to add the source file patch to   |  `["diff_bzl__patch"]` |
+| <a id="sync_source_file-preview_target"></a>preview_target |  An executable target to run to preview the difference between the two files. The executable will be invoked with the two files as positional arguments. Defaults to a target that runs sdiff.   |  `"@diff.bzl//diff:default_preview"` |
+| <a id="sync_source_file-preview_target_additional_args"></a>preview_target_additional_args |  Additional arguments to pass to the preview executable target   |  `[]` |
+| <a id="sync_source_file-validate"></a>validate |  Whether to fail the build when the files differ. Setting this to `False` retains the executable preview and update targets but the difference will not be flagged in an error message.   |  `True` |
 
 

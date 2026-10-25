@@ -84,10 +84,16 @@ sync_source_file(
 )
 ```
 
-The macro creates a patch with `diff`, validates it, and outputs an executable target to run to update the source tree file or directory.
+The macro creates a patch with `diff`, validates it, and creates two executable targets: one to preview the differences, and another to update the source tree file or directory to the desired state.
+
+When the files differ, a message is output via a failed build validation action instructing how to run the targets.
 
 ```
 Source file foo.txt is out of sync with its origin.
+
+To preview the differences, run:
+
+bazel run //:foo.preview
 
 To update, run:
 
@@ -95,6 +101,8 @@ bazel run //:foo --norun_validations
 ```
 
 By default, updates are done via the `patch` tool. Alternatively, the source copy can be overwritten by setting `mode = "copy"`.
+
+The preview tool runs `sdiff` by default but can be overridden with `preview_target`.
 
 To keep binary files in sync, use [sync_source_bin](./docs/rules.md#sync_source_bin).
 

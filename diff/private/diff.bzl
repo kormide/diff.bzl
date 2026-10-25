@@ -228,22 +228,22 @@ def _diff_rule_impl(ctx):
     source_patch_outputs = [ctx.outputs.patch] if source_patchable else []
 
     source_patch_args = None
-    if ctx.attr.validate:
-        patch_msg = ""
-        if source_patchable:
-            # Show a command to patch the source file if it's a (bazel) source file.
-            # NB: the error message we print here allows the user to be in any working directory.
-            source_patch_args = _get_source_patch_args(type, ctx.files.srcs[0], newfile)
-            if source_patch_args != None:
-                patch_cmd = "(cd \\$(bazel info workspace); patch {})".format(" ".join(source_patch_args))
-                patch_msg = """
-    To accept the diff, run:
-    {} < {}
-                """.format(patch_cmd, ctx.outputs.patch.path)
+    patch_msg = ""
+    if source_patchable:
+        # Show a command to patch the source file if it's a (bazel) source file.
+        # NB: the error message we print here allows the user to be in any working directory.
+        source_patch_args = _get_source_patch_args(type, ctx.files.srcs[0], newfile)
+        if source_patch_args != None:
+            patch_cmd = "(cd \\$(bazel info workspace); patch {})".format(" ".join(source_patch_args))
+            patch_msg = """
+To accept the diff, run:
+{} < {}
+            """.format(patch_cmd, ctx.outputs.patch.path)
 
-        validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
-    ERROR: diff command exited with non-zero status.
-    {}""".format(patch_msg, foo = "bar")
+    validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
+ERROR: diff command exited with non-zero status.
+{}""".format(patch_msg, foo = "bar")
+    if ctx.attr.validate:
         validation_outputs.append(_validate(ctx, validation_error_msg))
 
     source_patches_depset = depset(source_patch_outputs)
