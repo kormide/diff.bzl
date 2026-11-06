@@ -18,6 +18,19 @@ def _validate(ctx, error_message):
     )
     return cmp_valid_file
 
+def _readable_path(file):
+    """Path to `file` as read from the workspace root.
+
+    A source file is already workspace-relative. A generated file's path is
+    relative to the execution root, so a command that cd's to the workspace can
+    only read it back if a `bazel-out` convenience symlink happens to exist
+    there. Workspaces built with `--experimental_convenience_symlinks=ignore`
+    have no such symlink, so resolve the execution root explicitly instead.
+    """
+    if file.is_source:
+        return file.path
+    return "\\$(bazel info execution_root)/{}".format(file.path)
+
 def _cmp_rule_impl(ctx):
     CMP_BIN = ctx.toolchains[DIFFUTILS_TOOLCHAIN_TYPE].diffutilsinfo.cmp_bin
 
@@ -59,7 +72,7 @@ fi
             replace_msg = """
 To replace {file1}, run:
 
-(cd \\$(bazel info workspace); cp {file2} {file1})""".format(file1 = ctx.files.srcs[0].path, file2 = ctx.files.srcs[1].path)
+(cd \\$(bazel info workspace); cp {file2} {file1})""".format(file1 = ctx.files.srcs[0].path, file2 = _readable_path(ctx.files.srcs[1]))
 
         validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
 ERROR: cmp command exited with non-zero status.
