@@ -50,6 +50,17 @@ def _is_newfile(args):
             return True
     return False
 
+def _output_path(file):
+    """Path to an output file as read from the workspace root.
+
+    `File.path` is relative to the execution root, so a remediation command that
+    cd's to the workspace can only read it back if a `bazel-out` convenience
+    symlink happens to exist there. Workspaces built with
+    `--experimental_convenience_symlinks=ignore` have no such symlink, so
+    resolve the execution root explicitly instead.
+    """
+    return "\\$(bazel info execution_root)/{}".format(file.path)
+
 def _get_source_patch_args(type, source_file, newfile):
     args = None
     if type == "normal":
@@ -238,7 +249,7 @@ def _diff_rule_impl(ctx):
             patch_msg = """
 To accept the diff, run:
 {} < {}
-            """.format(patch_cmd, ctx.outputs.patch.path)
+            """.format(patch_cmd, _output_path(ctx.outputs.patch))
 
     validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
 ERROR: diff command exited with non-zero status.
