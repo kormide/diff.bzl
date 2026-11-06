@@ -110,6 +110,10 @@ bazel run //{}:{} --norun_validations
     if is_directory:
         diff_args.append("--new-file")
         diff_args.append("--recursive")
+    else:
+        # Name the source file on both sides of the patch. Otherwise the new side
+        # names the origin's path, which `git apply -p0` then tries to patch.
+        diff_args.extend(["--label", out_file_path, "--label", out_file_path])
 
     diff(
         name = "{}_patch".format(name),

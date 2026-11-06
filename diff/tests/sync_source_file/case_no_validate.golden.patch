@@ -1,0 +1,5 @@
+--- diff/tests/sync_source_file/case_no_validate.txt
++++ diff/tests/sync_source_file/case_no_validate.txt
+@@ -1 +1 @@
+-moocow
++foobar
