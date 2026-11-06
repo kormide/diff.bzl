@@ -170,3 +170,13 @@ build_test(
         ":case_sync_file_custom_preview_target_assert_preview",
     ],
 )
+
+# Both sides of the patch name the source file, so that `git apply -p0` can apply it.
+diff(
+    name = "case_no_validate_assert_patch",
+    srcs = [
+        "case_no_validate.golden.patch",
+        ":case_no_validate_patch",
+    ],
+    validate = True,
+)
