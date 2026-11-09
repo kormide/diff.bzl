@@ -1,5 +1,7 @@
 """Implements the cmp rule."""
 
+load(":utils.bzl", "readable_path")
+
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
 def _validate(ctx, error_message):
@@ -59,7 +61,7 @@ fi
             replace_msg = """
 To replace {file1}, run:
 
-(cd \\$(bazel info workspace); cp {file2} {file1})""".format(file1 = ctx.files.srcs[0].path, file2 = ctx.files.srcs[1].path)
+(cd \\$(bazel info workspace); cp {file2} {file1})""".format(file1 = ctx.files.srcs[0].path, file2 = readable_path(ctx.files.srcs[1]))
 
         validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
 ERROR: cmp command exited with non-zero status.

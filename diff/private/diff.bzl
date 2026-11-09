@@ -1,6 +1,7 @@
 """Implements the diff rule."""
 
 load("@bazel_lib//lib:expand_make_vars.bzl", "expand_locations")
+load(":utils.bzl", "readable_path")
 
 DIFFUTILS_TOOLCHAIN_TYPE = "@diff.bzl//diff/toolchain:execution_type"
 
@@ -238,7 +239,7 @@ def _diff_rule_impl(ctx):
             patch_msg = """
 To accept the diff, run:
 {} < {}
-            """.format(patch_cmd, ctx.outputs.patch.path)
+            """.format(patch_cmd, readable_path(ctx.outputs.patch))
 
     validation_error_msg = ctx.attr.validation_error_msg if ctx.attr.validation_error_msg else """\
 ERROR: diff command exited with non-zero status.

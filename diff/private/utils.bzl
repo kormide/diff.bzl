@@ -18,3 +18,23 @@ def source_file_info(source_label):
     is_directory = exists and not files_only
 
     return (exists, is_directory)
+
+def readable_path(file):
+    """Path to `file` as read from the workspace root.
+
+    A source file is already workspace-relative. A generated file's path is
+    relative to the execution root, so a command that cd's to the workspace can
+    only read it back if a `bazel-out` convenience symlink happens to exist
+    there. Workspaces built with `--experimental_convenience_symlinks=ignore`
+    have no such symlink, so resolve the execution root explicitly instead.
+
+    Args:
+        file: Source or generated File to read.
+
+    Returns:
+        A workspace-relative source path or an execution-root-based generated path,
+        with command substitution escaped for the validation action.
+    """
+    if file.is_source:
+        return file.path
+    return "\\$(bazel info execution_root)/{}".format(file.path)

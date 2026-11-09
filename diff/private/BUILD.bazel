@@ -15,6 +15,7 @@ bzl_library(
         "cmp.bzl",
     ],
     visibility = ["//diff:__subpackages__"],
+    deps = [":utils"],
 )
 
 bzl_library(
@@ -24,6 +25,7 @@ bzl_library(
     ],
     visibility = ["//diff:__subpackages__"],
     deps = [
+        ":utils",
         "@bazel_lib//lib:expand_make_vars",
     ],
 )
