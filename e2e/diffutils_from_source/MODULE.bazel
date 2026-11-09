@@ -4,6 +4,9 @@ bazel_dep(name = "diffutils", version = "3.12")
 bazel_dep(name = "diff.bzl")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 
+# diffutils pulls in sed 4.9, whose bundled gnulib memchr fails with newer glibc.
+bazel_dep(name = "sed", version = "4.10.bcr.3")
+
 local_path_override(
     module_name = "diff.bzl",
     path = "../..",
